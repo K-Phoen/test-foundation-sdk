@@ -5,10 +5,10 @@ repo_name: "grafana/grafana-foundation-sdk"
 repo_url: "https://github.com/grafana/grafana-foundation-sdk"
 
 nav:
-  - "Go": "/next+cog-v0.0.x/go/Reference/"
-  - "PHP": "/next+cog-v0.0.x/php/Reference/"
-  - "Python": "/next+cog-v0.0.x/python/Reference/"
-  - "Typescript": "/next+cog-v0.0.x/typescript/Reference/"
+  - "Go": "./next+cog-v0.0.x/go/Reference/"
+  - "PHP": "./next+cog-v0.0.x/php/Reference/"
+  - "Python": "./next+cog-v0.0.x/python/Reference/"
+  - "Typescript": "./next+cog-v0.0.x/typescript/Reference/"
 
 markdown_extensions:
   - admonition

@@ -17,6 +17,7 @@ class PanelBuilder implements \Grafana\Foundation\Cog\Builder
     }
 
     /**
+     * Builds the object.
      * @return \Grafana\Foundation\Dashboard\Panel
      */
     public function build()
@@ -615,7 +616,7 @@ class PanelBuilder implements \Grafana\Foundation\Cog\Builder
         return $this;
     }
     /**
-     * @param \Grafana\Foundation\Cog\Builder<\Grafana\Foundation\Common\TableAutoCellOptions>|\Grafana\Foundation\Cog\Builder<\Grafana\Foundation\Common\TableSparklineCellOptions>|\Grafana\Foundation\Cog\Builder<\Grafana\Foundation\Common\TableBarGaugeCellOptions>|\Grafana\Foundation\Cog\Builder<\Grafana\Foundation\Common\TableColoredBackgroundCellOptions>|\Grafana\Foundation\Cog\Builder<\Grafana\Foundation\Common\TableColorTextCellOptions>|\Grafana\Foundation\Cog\Builder<\Grafana\Foundation\Common\TableImageCellOptions>|\Grafana\Foundation\Common\TableDataLinksCellOptions|\Grafana\Foundation\Common\TableJsonViewCellOptions $cellOptions
+     * @param \Grafana\Foundation\Cog\Builder<\Grafana\Foundation\Common\TableAutoCellOptions>|\Grafana\Foundation\Cog\Builder<\Grafana\Foundation\Common\TableSparklineCellOptions>|\Grafana\Foundation\Cog\Builder<\Grafana\Foundation\Common\TableBarGaugeCellOptions>|\Grafana\Foundation\Cog\Builder<\Grafana\Foundation\Common\TableColoredBackgroundCellOptions>|\Grafana\Foundation\Cog\Builder<\Grafana\Foundation\Common\TableColorTextCellOptions>|\Grafana\Foundation\Cog\Builder<\Grafana\Foundation\Common\TableImageCellOptions>|\Grafana\Foundation\Common\TableDataLinksCellOptions|\Grafana\Foundation\Common\TableActionsCellOptions|\Grafana\Foundation\Common\TableJsonViewCellOptions $cellOptions
      */
     public function cellOptions( $cellOptions): static
     {    
@@ -627,7 +628,7 @@ class PanelBuilder implements \Grafana\Foundation\Cog\Builder
             $this->internal->fieldConfig->defaults->custom = new \Grafana\Foundation\Table\FieldConfig();
         }
         assert($this->internal->fieldConfig->defaults->custom instanceof \Grafana\Foundation\Table\FieldConfig);
-        /** @var \Grafana\Foundation\Common\TableAutoCellOptions|\Grafana\Foundation\Common\TableSparklineCellOptions|\Grafana\Foundation\Common\TableBarGaugeCellOptions|\Grafana\Foundation\Common\TableColoredBackgroundCellOptions|\Grafana\Foundation\Common\TableColorTextCellOptions|\Grafana\Foundation\Common\TableImageCellOptions|\Grafana\Foundation\Common\TableDataLinksCellOptions|\Grafana\Foundation\Common\TableJsonViewCellOptions $cellOptionsResource */
+        /** @var \Grafana\Foundation\Common\TableAutoCellOptions|\Grafana\Foundation\Common\TableSparklineCellOptions|\Grafana\Foundation\Common\TableBarGaugeCellOptions|\Grafana\Foundation\Common\TableColoredBackgroundCellOptions|\Grafana\Foundation\Common\TableColorTextCellOptions|\Grafana\Foundation\Common\TableImageCellOptions|\Grafana\Foundation\Common\TableDataLinksCellOptions|\Grafana\Foundation\Common\TableActionsCellOptions|\Grafana\Foundation\Common\TableJsonViewCellOptions $cellOptionsResource */
         $cellOptionsResource = $cellOptions instanceof \Grafana\Foundation\Cog\Builder ? $cellOptions->build() : $cellOptions;
         $this->internal->fieldConfig->defaults->custom->cellOptions = $cellOptionsResource;
     

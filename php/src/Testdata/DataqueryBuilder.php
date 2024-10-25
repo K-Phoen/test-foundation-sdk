@@ -15,6 +15,7 @@ class DataqueryBuilder implements \Grafana\Foundation\Cog\Builder
     }
 
     /**
+     * Builds the object.
      * @return \Grafana\Foundation\Testdata\Dataquery
      */
     public function build()
@@ -77,6 +78,17 @@ class DataqueryBuilder implements \Grafana\Foundation\Cog\Builder
     public function dropPercent(float $dropPercent): static
     {
         $this->internal->dropPercent = $dropPercent;
+    
+        return $this;
+    }
+    /**
+     * Possible enum values:
+     *  - `"plugin"` 
+     *  - `"downstream"` 
+     */
+    public function errorSource(\Grafana\Foundation\Testdata\DataqueryErrorSource $errorSource): static
+    {
+        $this->internal->errorSource = $errorSource;
     
         return $this;
     }
@@ -240,6 +252,7 @@ class DataqueryBuilder implements \Grafana\Foundation\Cog\Builder
      *  - `"csv_file"` 
      *  - `"csv_metric_values"` 
      *  - `"datapoints_outside_range"` 
+     *  - `"error_with_source"` 
      *  - `"exponential_heatmap_bucket_data"` 
      *  - `"flame_graph"` 
      *  - `"grafana_api"` 

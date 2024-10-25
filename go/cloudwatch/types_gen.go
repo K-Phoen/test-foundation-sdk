@@ -6,7 +6,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
 
+	cog "github.com/grafana/grafana-foundation-sdk/go/cog"
 	variants "github.com/grafana/grafana-foundation-sdk/go/cog/variants"
 	dashboard "github.com/grafana/grafana-foundation-sdk/go/dashboard"
 )
@@ -32,6 +34,150 @@ type MetricStat struct {
 	Statistics []string `json:"statistics,omitempty"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `MetricStat` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *MetricStat) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "region"
+	if fields["region"] != nil {
+		if string(fields["region"]) != "null" {
+			if err := json.Unmarshal(fields["region"], &resource.Region); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("region", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("region", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "region")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("region", errors.New("required field is missing from input"))...)
+	}
+	// Field "namespace"
+	if fields["namespace"] != nil {
+		if string(fields["namespace"]) != "null" {
+			if err := json.Unmarshal(fields["namespace"], &resource.Namespace); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("namespace", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("namespace", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "namespace")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("namespace", errors.New("required field is missing from input"))...)
+	}
+	// Field "metricName"
+	if fields["metricName"] != nil {
+		if string(fields["metricName"]) != "null" {
+			if err := json.Unmarshal(fields["metricName"], &resource.MetricName); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("metricName", err)...)
+			}
+
+		}
+		delete(fields, "metricName")
+
+	}
+	// Field "dimensions"
+	if fields["dimensions"] != nil {
+		if string(fields["dimensions"]) != "null" {
+
+			partialMap := make(map[string]json.RawMessage)
+			if err := json.Unmarshal(fields["dimensions"], &partialMap); err != nil {
+				return err
+			}
+			parsedMap1 := make(map[string]StringOrArrayOfString, len(partialMap))
+			for key1 := range partialMap {
+				var result1 StringOrArrayOfString
+
+				result1 = StringOrArrayOfString{}
+				if err := result1.UnmarshalJSONStrict(partialMap[key1]); err != nil {
+					errs = append(errs, cog.MakeBuildErrors("dimensions["+key1+"]", err)...)
+				}
+				parsedMap1[key1] = result1
+			}
+			resource.Dimensions = cog.ToPtr(Dimensions(parsedMap1))
+
+		}
+		delete(fields, "dimensions")
+
+	}
+	// Field "matchExact"
+	if fields["matchExact"] != nil {
+		if string(fields["matchExact"]) != "null" {
+			if err := json.Unmarshal(fields["matchExact"], &resource.MatchExact); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("matchExact", err)...)
+			}
+
+		}
+		delete(fields, "matchExact")
+
+	}
+	// Field "period"
+	if fields["period"] != nil {
+		if string(fields["period"]) != "null" {
+			if err := json.Unmarshal(fields["period"], &resource.Period); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("period", err)...)
+			}
+
+		}
+		delete(fields, "period")
+
+	}
+	// Field "accountId"
+	if fields["accountId"] != nil {
+		if string(fields["accountId"]) != "null" {
+			if err := json.Unmarshal(fields["accountId"], &resource.AccountId); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("accountId", err)...)
+			}
+
+		}
+		delete(fields, "accountId")
+
+	}
+	// Field "statistic"
+	if fields["statistic"] != nil {
+		if string(fields["statistic"]) != "null" {
+			if err := json.Unmarshal(fields["statistic"], &resource.Statistic); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("statistic", err)...)
+			}
+
+		}
+		delete(fields, "statistic")
+
+	}
+	// Field "statistics"
+	if fields["statistics"] != nil {
+		if string(fields["statistics"]) != "null" {
+
+			if err := json.Unmarshal(fields["statistics"], &resource.Statistics); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("statistics", err)...)
+			}
+
+		}
+		delete(fields, "statistics")
+
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("MetricStat", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two `MetricStat` objects.
 func (resource MetricStat) Equals(other MetricStat) bool {
 	if resource.Region != other.Region {
 		return false
@@ -114,6 +260,11 @@ func (resource MetricStat) Equals(other MetricStat) bool {
 	return true
 }
 
+// Validate checks all the validation constraints that may be defined on `MetricStat` fields for violations and returns them.
+func (resource MetricStat) Validate() error {
+	return nil
+}
+
 // A name/value pair that is part of the identity of a metric. For example, you can get statistics for a specific EC2 instance by specifying the InstanceId dimension when you search for metrics.
 type Dimensions map[string]StringOrArrayOfString
 
@@ -178,6 +329,306 @@ func (resource CloudWatchMetricsQuery) DataqueryType() string {
 	return "cloudwatch"
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `CloudWatchMetricsQuery` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *CloudWatchMetricsQuery) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "queryMode"
+	if fields["queryMode"] != nil {
+		if string(fields["queryMode"]) != "null" {
+			if err := json.Unmarshal(fields["queryMode"], &resource.QueryMode); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("queryMode", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("queryMode", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "queryMode")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("queryMode", errors.New("required field is missing from input"))...)
+	}
+	// Field "metricQueryType"
+	if fields["metricQueryType"] != nil {
+		if string(fields["metricQueryType"]) != "null" {
+			if err := json.Unmarshal(fields["metricQueryType"], &resource.MetricQueryType); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("metricQueryType", err)...)
+			}
+
+		}
+		delete(fields, "metricQueryType")
+
+	}
+	// Field "metricEditorMode"
+	if fields["metricEditorMode"] != nil {
+		if string(fields["metricEditorMode"]) != "null" {
+			if err := json.Unmarshal(fields["metricEditorMode"], &resource.MetricEditorMode); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("metricEditorMode", err)...)
+			}
+
+		}
+		delete(fields, "metricEditorMode")
+
+	}
+	// Field "id"
+	if fields["id"] != nil {
+		if string(fields["id"]) != "null" {
+			if err := json.Unmarshal(fields["id"], &resource.Id); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("id", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("id", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "id")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("id", errors.New("required field is missing from input"))...)
+	}
+	// Field "alias"
+	if fields["alias"] != nil {
+		if string(fields["alias"]) != "null" {
+			if err := json.Unmarshal(fields["alias"], &resource.Alias); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("alias", err)...)
+			}
+
+		}
+		delete(fields, "alias")
+
+	}
+	// Field "label"
+	if fields["label"] != nil {
+		if string(fields["label"]) != "null" {
+			if err := json.Unmarshal(fields["label"], &resource.Label); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("label", err)...)
+			}
+
+		}
+		delete(fields, "label")
+
+	}
+	// Field "expression"
+	if fields["expression"] != nil {
+		if string(fields["expression"]) != "null" {
+			if err := json.Unmarshal(fields["expression"], &resource.Expression); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("expression", err)...)
+			}
+
+		}
+		delete(fields, "expression")
+
+	}
+	// Field "sqlExpression"
+	if fields["sqlExpression"] != nil {
+		if string(fields["sqlExpression"]) != "null" {
+			if err := json.Unmarshal(fields["sqlExpression"], &resource.SqlExpression); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("sqlExpression", err)...)
+			}
+
+		}
+		delete(fields, "sqlExpression")
+
+	}
+	// Field "refId"
+	if fields["refId"] != nil {
+		if string(fields["refId"]) != "null" {
+			if err := json.Unmarshal(fields["refId"], &resource.RefId); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("refId", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("refId", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "refId")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("refId", errors.New("required field is missing from input"))...)
+	}
+	// Field "hide"
+	if fields["hide"] != nil {
+		if string(fields["hide"]) != "null" {
+			if err := json.Unmarshal(fields["hide"], &resource.Hide); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("hide", err)...)
+			}
+
+		}
+		delete(fields, "hide")
+
+	}
+	// Field "queryType"
+	if fields["queryType"] != nil {
+		if string(fields["queryType"]) != "null" {
+			if err := json.Unmarshal(fields["queryType"], &resource.QueryType); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("queryType", err)...)
+			}
+
+		}
+		delete(fields, "queryType")
+
+	}
+	// Field "region"
+	if fields["region"] != nil {
+		if string(fields["region"]) != "null" {
+			if err := json.Unmarshal(fields["region"], &resource.Region); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("region", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("region", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "region")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("region", errors.New("required field is missing from input"))...)
+	}
+	// Field "namespace"
+	if fields["namespace"] != nil {
+		if string(fields["namespace"]) != "null" {
+			if err := json.Unmarshal(fields["namespace"], &resource.Namespace); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("namespace", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("namespace", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "namespace")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("namespace", errors.New("required field is missing from input"))...)
+	}
+	// Field "metricName"
+	if fields["metricName"] != nil {
+		if string(fields["metricName"]) != "null" {
+			if err := json.Unmarshal(fields["metricName"], &resource.MetricName); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("metricName", err)...)
+			}
+
+		}
+		delete(fields, "metricName")
+
+	}
+	// Field "dimensions"
+	if fields["dimensions"] != nil {
+		if string(fields["dimensions"]) != "null" {
+
+			partialMap := make(map[string]json.RawMessage)
+			if err := json.Unmarshal(fields["dimensions"], &partialMap); err != nil {
+				return err
+			}
+			parsedMap1 := make(map[string]StringOrArrayOfString, len(partialMap))
+			for key1 := range partialMap {
+				var result1 StringOrArrayOfString
+
+				result1 = StringOrArrayOfString{}
+				if err := result1.UnmarshalJSONStrict(partialMap[key1]); err != nil {
+					errs = append(errs, cog.MakeBuildErrors("dimensions["+key1+"]", err)...)
+				}
+				parsedMap1[key1] = result1
+			}
+			resource.Dimensions = cog.ToPtr(Dimensions(parsedMap1))
+
+		}
+		delete(fields, "dimensions")
+
+	}
+	// Field "matchExact"
+	if fields["matchExact"] != nil {
+		if string(fields["matchExact"]) != "null" {
+			if err := json.Unmarshal(fields["matchExact"], &resource.MatchExact); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("matchExact", err)...)
+			}
+
+		}
+		delete(fields, "matchExact")
+
+	}
+	// Field "period"
+	if fields["period"] != nil {
+		if string(fields["period"]) != "null" {
+			if err := json.Unmarshal(fields["period"], &resource.Period); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("period", err)...)
+			}
+
+		}
+		delete(fields, "period")
+
+	}
+	// Field "accountId"
+	if fields["accountId"] != nil {
+		if string(fields["accountId"]) != "null" {
+			if err := json.Unmarshal(fields["accountId"], &resource.AccountId); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("accountId", err)...)
+			}
+
+		}
+		delete(fields, "accountId")
+
+	}
+	// Field "statistic"
+	if fields["statistic"] != nil {
+		if string(fields["statistic"]) != "null" {
+			if err := json.Unmarshal(fields["statistic"], &resource.Statistic); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("statistic", err)...)
+			}
+
+		}
+		delete(fields, "statistic")
+
+	}
+	// Field "sql"
+	if fields["sql"] != nil {
+		if string(fields["sql"]) != "null" {
+
+			resource.Sql = &SQLExpression{}
+			if err := resource.Sql.UnmarshalJSONStrict(fields["sql"]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("sql", err)...)
+			}
+
+		}
+		delete(fields, "sql")
+
+	}
+	// Field "datasource"
+	if fields["datasource"] != nil {
+		if string(fields["datasource"]) != "null" {
+
+			resource.Datasource = &dashboard.DataSourceRef{}
+			if err := resource.Datasource.UnmarshalJSONStrict(fields["datasource"]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("datasource", err)...)
+			}
+
+		}
+		delete(fields, "datasource")
+
+	}
+	// Field "statistics"
+	if fields["statistics"] != nil {
+		if string(fields["statistics"]) != "null" {
+
+			if err := json.Unmarshal(fields["statistics"], &resource.Statistics); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("statistics", err)...)
+			}
+
+		}
+		delete(fields, "statistics")
+
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("CloudWatchMetricsQuery", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two dataqueries.
 func (resource CloudWatchMetricsQuery) Equals(otherCandidate variants.Dataquery) bool {
 	if otherCandidate == nil {
 		return false
@@ -367,6 +818,27 @@ func (resource CloudWatchMetricsQuery) Equals(otherCandidate variants.Dataquery)
 	return true
 }
 
+// Validate checks all the validation constraints that may be defined on `CloudWatchMetricsQuery` fields for violations and returns them.
+func (resource CloudWatchMetricsQuery) Validate() error {
+	var errs cog.BuildErrors
+	if resource.Sql != nil {
+		if err := resource.Sql.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("sql", err)...)
+		}
+	}
+	if resource.Datasource != nil {
+		if err := resource.Datasource.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("datasource", err)...)
+		}
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 type CloudWatchQueryMode string
 
 const (
@@ -406,6 +878,118 @@ type SQLExpression struct {
 	Limit *int64 `json:"limit,omitempty"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `SQLExpression` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *SQLExpression) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "select"
+	if fields["select"] != nil {
+		if string(fields["select"]) != "null" {
+
+			resource.Select = &QueryEditorFunctionExpression{}
+			if err := resource.Select.UnmarshalJSONStrict(fields["select"]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("select", err)...)
+			}
+
+		}
+		delete(fields, "select")
+
+	}
+	// Field "from"
+	if fields["from"] != nil {
+		if string(fields["from"]) != "null" {
+
+			resource.From = &QueryEditorPropertyExpressionOrQueryEditorFunctionExpression{}
+			if err := resource.From.UnmarshalJSONStrict(fields["from"]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("from", err)...)
+			}
+
+		}
+		delete(fields, "from")
+
+	}
+	// Field "where"
+	if fields["where"] != nil {
+		if string(fields["where"]) != "null" {
+
+			resource.Where = &QueryEditorArrayExpression{}
+			if err := resource.Where.UnmarshalJSONStrict(fields["where"]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("where", err)...)
+			}
+
+		}
+		delete(fields, "where")
+
+	}
+	// Field "groupBy"
+	if fields["groupBy"] != nil {
+		if string(fields["groupBy"]) != "null" {
+
+			resource.GroupBy = &QueryEditorArrayExpression{}
+			if err := resource.GroupBy.UnmarshalJSONStrict(fields["groupBy"]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("groupBy", err)...)
+			}
+
+		}
+		delete(fields, "groupBy")
+
+	}
+	// Field "orderBy"
+	if fields["orderBy"] != nil {
+		if string(fields["orderBy"]) != "null" {
+
+			resource.OrderBy = &QueryEditorFunctionExpression{}
+			if err := resource.OrderBy.UnmarshalJSONStrict(fields["orderBy"]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("orderBy", err)...)
+			}
+
+		}
+		delete(fields, "orderBy")
+
+	}
+	// Field "orderByDirection"
+	if fields["orderByDirection"] != nil {
+		if string(fields["orderByDirection"]) != "null" {
+			if err := json.Unmarshal(fields["orderByDirection"], &resource.OrderByDirection); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("orderByDirection", err)...)
+			}
+
+		}
+		delete(fields, "orderByDirection")
+
+	}
+	// Field "limit"
+	if fields["limit"] != nil {
+		if string(fields["limit"]) != "null" {
+			if err := json.Unmarshal(fields["limit"], &resource.Limit); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("limit", err)...)
+			}
+
+		}
+		delete(fields, "limit")
+
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("SQLExpression", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two `SQLExpression` objects.
 func (resource SQLExpression) Equals(other SQLExpression) bool {
 	if resource.Select == nil && other.Select != nil || resource.Select != nil && other.Select == nil {
 		return false
@@ -474,12 +1058,121 @@ func (resource SQLExpression) Equals(other SQLExpression) bool {
 	return true
 }
 
+// Validate checks all the validation constraints that may be defined on `SQLExpression` fields for violations and returns them.
+func (resource SQLExpression) Validate() error {
+	var errs cog.BuildErrors
+	if resource.Select != nil {
+		if err := resource.Select.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("select", err)...)
+		}
+	}
+	if resource.From != nil {
+		if err := resource.From.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("from", err)...)
+		}
+	}
+	if resource.Where != nil {
+		if err := resource.Where.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("where", err)...)
+		}
+	}
+	if resource.GroupBy != nil {
+		if err := resource.GroupBy.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("groupBy", err)...)
+		}
+	}
+	if resource.OrderBy != nil {
+		if err := resource.OrderBy.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("orderBy", err)...)
+		}
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 type QueryEditorFunctionExpression struct {
 	Type       string                                   `json:"type"`
 	Name       *string                                  `json:"name,omitempty"`
 	Parameters []QueryEditorFunctionParameterExpression `json:"parameters,omitempty"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `QueryEditorFunctionExpression` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *QueryEditorFunctionExpression) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "type"
+	if fields["type"] != nil {
+		if string(fields["type"]) != "null" {
+			if err := json.Unmarshal(fields["type"], &resource.Type); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("type", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("type", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "type")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("type", errors.New("required field is missing from input"))...)
+	}
+	// Field "name"
+	if fields["name"] != nil {
+		if string(fields["name"]) != "null" {
+			if err := json.Unmarshal(fields["name"], &resource.Name); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("name", err)...)
+			}
+
+		}
+		delete(fields, "name")
+
+	}
+	// Field "parameters"
+	if fields["parameters"] != nil {
+		if string(fields["parameters"]) != "null" {
+
+			partialArray := []json.RawMessage{}
+			if err := json.Unmarshal(fields["parameters"], &partialArray); err != nil {
+				return err
+			}
+
+			for i1 := range partialArray {
+				var result1 QueryEditorFunctionParameterExpression
+
+				result1 = QueryEditorFunctionParameterExpression{}
+				if err := result1.UnmarshalJSONStrict(partialArray[i1]); err != nil {
+					errs = append(errs, cog.MakeBuildErrors("parameters["+strconv.Itoa(i1)+"]", err)...)
+				}
+				resource.Parameters = append(resource.Parameters, result1)
+			}
+
+		}
+		delete(fields, "parameters")
+
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("QueryEditorFunctionExpression", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two `QueryEditorFunctionExpression` objects.
 func (resource QueryEditorFunctionExpression) Equals(other QueryEditorFunctionExpression) bool {
 	if resource.Type != other.Type {
 		return false
@@ -507,6 +1200,29 @@ func (resource QueryEditorFunctionExpression) Equals(other QueryEditorFunctionEx
 	return true
 }
 
+// Validate checks all the validation constraints that may be defined on `QueryEditorFunctionExpression` fields for violations and returns them.
+func (resource QueryEditorFunctionExpression) Validate() error {
+	var errs cog.BuildErrors
+	if !(resource.Type == "function") {
+		errs = append(errs, cog.MakeBuildErrors(
+			"type",
+			errors.New("must be == function"),
+		)...)
+	}
+
+	for i1 := range resource.Parameters {
+		if err := resource.Parameters[i1].Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("parameters["+strconv.Itoa(i1)+"]", err)...)
+		}
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 type QueryEditorExpressionType string
 
 const (
@@ -524,6 +1240,56 @@ type QueryEditorFunctionParameterExpression struct {
 	Name *string `json:"name,omitempty"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `QueryEditorFunctionParameterExpression` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *QueryEditorFunctionParameterExpression) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "type"
+	if fields["type"] != nil {
+		if string(fields["type"]) != "null" {
+			if err := json.Unmarshal(fields["type"], &resource.Type); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("type", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("type", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "type")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("type", errors.New("required field is missing from input"))...)
+	}
+	// Field "name"
+	if fields["name"] != nil {
+		if string(fields["name"]) != "null" {
+			if err := json.Unmarshal(fields["name"], &resource.Name); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("name", err)...)
+			}
+
+		}
+		delete(fields, "name")
+
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("QueryEditorFunctionParameterExpression", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two `QueryEditorFunctionParameterExpression` objects.
 func (resource QueryEditorFunctionParameterExpression) Equals(other QueryEditorFunctionParameterExpression) bool {
 	if resource.Type != other.Type {
 		return false
@@ -541,11 +1307,83 @@ func (resource QueryEditorFunctionParameterExpression) Equals(other QueryEditorF
 	return true
 }
 
+// Validate checks all the validation constraints that may be defined on `QueryEditorFunctionParameterExpression` fields for violations and returns them.
+func (resource QueryEditorFunctionParameterExpression) Validate() error {
+	var errs cog.BuildErrors
+	if !(resource.Type == "functionParameter") {
+		errs = append(errs, cog.MakeBuildErrors(
+			"type",
+			errors.New("must be == functionParameter"),
+		)...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 type QueryEditorPropertyExpression struct {
 	Type     string              `json:"type"`
 	Property QueryEditorProperty `json:"property"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `QueryEditorPropertyExpression` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *QueryEditorPropertyExpression) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "type"
+	if fields["type"] != nil {
+		if string(fields["type"]) != "null" {
+			if err := json.Unmarshal(fields["type"], &resource.Type); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("type", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("type", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "type")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("type", errors.New("required field is missing from input"))...)
+	}
+	// Field "property"
+	if fields["property"] != nil {
+		if string(fields["property"]) != "null" {
+
+			resource.Property = QueryEditorProperty{}
+			if err := resource.Property.UnmarshalJSONStrict(fields["property"]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("property", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("property", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "property")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("property", errors.New("required field is missing from input"))...)
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("QueryEditorPropertyExpression", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two `QueryEditorPropertyExpression` objects.
 func (resource QueryEditorPropertyExpression) Equals(other QueryEditorPropertyExpression) bool {
 	if resource.Type != other.Type {
 		return false
@@ -557,11 +1395,86 @@ func (resource QueryEditorPropertyExpression) Equals(other QueryEditorPropertyEx
 	return true
 }
 
+// Validate checks all the validation constraints that may be defined on `QueryEditorPropertyExpression` fields for violations and returns them.
+func (resource QueryEditorPropertyExpression) Validate() error {
+	var errs cog.BuildErrors
+	if !(resource.Type == "property") {
+		errs = append(errs, cog.MakeBuildErrors(
+			"type",
+			errors.New("must be == property"),
+		)...)
+	}
+	if err := resource.Property.Validate(); err != nil {
+		errs = append(errs, cog.MakeBuildErrors("property", err)...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 type QueryEditorGroupByExpression struct {
 	Type     string              `json:"type"`
 	Property QueryEditorProperty `json:"property"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `QueryEditorGroupByExpression` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *QueryEditorGroupByExpression) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "type"
+	if fields["type"] != nil {
+		if string(fields["type"]) != "null" {
+			if err := json.Unmarshal(fields["type"], &resource.Type); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("type", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("type", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "type")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("type", errors.New("required field is missing from input"))...)
+	}
+	// Field "property"
+	if fields["property"] != nil {
+		if string(fields["property"]) != "null" {
+
+			resource.Property = QueryEditorProperty{}
+			if err := resource.Property.UnmarshalJSONStrict(fields["property"]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("property", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("property", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "property")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("property", errors.New("required field is missing from input"))...)
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("QueryEditorGroupByExpression", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two `QueryEditorGroupByExpression` objects.
 func (resource QueryEditorGroupByExpression) Equals(other QueryEditorGroupByExpression) bool {
 	if resource.Type != other.Type {
 		return false
@@ -573,6 +1486,26 @@ func (resource QueryEditorGroupByExpression) Equals(other QueryEditorGroupByExpr
 	return true
 }
 
+// Validate checks all the validation constraints that may be defined on `QueryEditorGroupByExpression` fields for violations and returns them.
+func (resource QueryEditorGroupByExpression) Validate() error {
+	var errs cog.BuildErrors
+	if !(resource.Type == "groupBy") {
+		errs = append(errs, cog.MakeBuildErrors(
+			"type",
+			errors.New("must be == groupBy"),
+		)...)
+	}
+	if err := resource.Property.Validate(); err != nil {
+		errs = append(errs, cog.MakeBuildErrors("property", err)...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 type QueryEditorOperatorExpression struct {
 	Type     string              `json:"type"`
 	Property QueryEditorProperty `json:"property"`
@@ -580,6 +1513,77 @@ type QueryEditorOperatorExpression struct {
 	Operator QueryEditorOperator `json:"operator"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `QueryEditorOperatorExpression` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *QueryEditorOperatorExpression) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "type"
+	if fields["type"] != nil {
+		if string(fields["type"]) != "null" {
+			if err := json.Unmarshal(fields["type"], &resource.Type); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("type", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("type", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "type")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("type", errors.New("required field is missing from input"))...)
+	}
+	// Field "property"
+	if fields["property"] != nil {
+		if string(fields["property"]) != "null" {
+
+			resource.Property = QueryEditorProperty{}
+			if err := resource.Property.UnmarshalJSONStrict(fields["property"]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("property", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("property", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "property")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("property", errors.New("required field is missing from input"))...)
+	}
+	// Field "operator"
+	if fields["operator"] != nil {
+		if string(fields["operator"]) != "null" {
+
+			resource.Operator = QueryEditorOperator{}
+			if err := resource.Operator.UnmarshalJSONStrict(fields["operator"]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("operator", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("operator", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "operator")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("operator", errors.New("required field is missing from input"))...)
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("QueryEditorOperatorExpression", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two `QueryEditorOperatorExpression` objects.
 func (resource QueryEditorOperatorExpression) Equals(other QueryEditorOperatorExpression) bool {
 	if resource.Type != other.Type {
 		return false
@@ -594,12 +1598,84 @@ func (resource QueryEditorOperatorExpression) Equals(other QueryEditorOperatorEx
 	return true
 }
 
+// Validate checks all the validation constraints that may be defined on `QueryEditorOperatorExpression` fields for violations and returns them.
+func (resource QueryEditorOperatorExpression) Validate() error {
+	var errs cog.BuildErrors
+	if !(resource.Type == "operator") {
+		errs = append(errs, cog.MakeBuildErrors(
+			"type",
+			errors.New("must be == operator"),
+		)...)
+	}
+	if err := resource.Property.Validate(); err != nil {
+		errs = append(errs, cog.MakeBuildErrors("property", err)...)
+	}
+	if err := resource.Operator.Validate(); err != nil {
+		errs = append(errs, cog.MakeBuildErrors("operator", err)...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 // TS type is QueryEditorOperator<T extends QueryEditorOperatorValueType>, extended in veneer
 type QueryEditorOperator struct {
 	Name  *string                                              `json:"name,omitempty"`
 	Value *StringOrBoolOrInt64OrArrayOfQueryEditorOperatorType `json:"value,omitempty"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `QueryEditorOperator` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *QueryEditorOperator) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "name"
+	if fields["name"] != nil {
+		if string(fields["name"]) != "null" {
+			if err := json.Unmarshal(fields["name"], &resource.Name); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("name", err)...)
+			}
+
+		}
+		delete(fields, "name")
+
+	}
+	// Field "value"
+	if fields["value"] != nil {
+		if string(fields["value"]) != "null" {
+
+			resource.Value = &StringOrBoolOrInt64OrArrayOfQueryEditorOperatorType{}
+			if err := resource.Value.UnmarshalJSONStrict(fields["value"]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("value", err)...)
+			}
+
+		}
+		delete(fields, "value")
+
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("QueryEditorOperator", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two `QueryEditorOperator` objects.
 func (resource QueryEditorOperator) Equals(other QueryEditorOperator) bool {
 	if resource.Name == nil && other.Name != nil || resource.Name != nil && other.Name == nil {
 		return false
@@ -623,6 +1699,22 @@ func (resource QueryEditorOperator) Equals(other QueryEditorOperator) bool {
 	return true
 }
 
+// Validate checks all the validation constraints that may be defined on `QueryEditorOperator` fields for violations and returns them.
+func (resource QueryEditorOperator) Validate() error {
+	var errs cog.BuildErrors
+	if resource.Value != nil {
+		if err := resource.Value.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("value", err)...)
+		}
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 type QueryEditorOperatorValueType = StringOrBoolOrInt64OrArrayOfQueryEditorOperatorType
 
 type QueryEditorOperatorType = StringOrBoolOrInt64
@@ -632,6 +1724,56 @@ type QueryEditorProperty struct {
 	Name *string                 `json:"name,omitempty"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `QueryEditorProperty` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *QueryEditorProperty) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "type"
+	if fields["type"] != nil {
+		if string(fields["type"]) != "null" {
+			if err := json.Unmarshal(fields["type"], &resource.Type); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("type", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("type", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "type")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("type", errors.New("required field is missing from input"))...)
+	}
+	// Field "name"
+	if fields["name"] != nil {
+		if string(fields["name"]) != "null" {
+			if err := json.Unmarshal(fields["name"], &resource.Name); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("name", err)...)
+			}
+
+		}
+		delete(fields, "name")
+
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("QueryEditorProperty", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two `QueryEditorProperty` objects.
 func (resource QueryEditorProperty) Equals(other QueryEditorProperty) bool {
 	if resource.Type != other.Type {
 		return false
@@ -649,6 +1791,11 @@ func (resource QueryEditorProperty) Equals(other QueryEditorProperty) bool {
 	return true
 }
 
+// Validate checks all the validation constraints that may be defined on `QueryEditorProperty` fields for violations and returns them.
+func (resource QueryEditorProperty) Validate() error {
+	return nil
+}
+
 type QueryEditorPropertyType string
 
 const (
@@ -660,6 +1807,71 @@ type QueryEditorArrayExpression struct {
 	Expressions []QueryEditorExpression        `json:"expressions"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `QueryEditorArrayExpression` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *QueryEditorArrayExpression) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "type"
+	if fields["type"] != nil {
+		if string(fields["type"]) != "null" {
+			if err := json.Unmarshal(fields["type"], &resource.Type); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("type", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("type", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "type")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("type", errors.New("required field is missing from input"))...)
+	}
+	// Field "expressions"
+	if fields["expressions"] != nil {
+		if string(fields["expressions"]) != "null" {
+
+			partialArray := []json.RawMessage{}
+			if err := json.Unmarshal(fields["expressions"], &partialArray); err != nil {
+				return err
+			}
+
+			for i1 := range partialArray {
+				var result1 QueryEditorExpression
+
+				result1 = QueryEditorExpression{}
+				if err := result1.UnmarshalJSONStrict(partialArray[i1]); err != nil {
+					errs = append(errs, cog.MakeBuildErrors("expressions["+strconv.Itoa(i1)+"]", err)...)
+				}
+				resource.Expressions = append(resource.Expressions, result1)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("expressions", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "expressions")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("expressions", errors.New("required field is missing from input"))...)
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("QueryEditorArrayExpression", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two `QueryEditorArrayExpression` objects.
 func (resource QueryEditorArrayExpression) Equals(other QueryEditorArrayExpression) bool {
 	if resource.Type != other.Type {
 		return false
@@ -676,6 +1888,23 @@ func (resource QueryEditorArrayExpression) Equals(other QueryEditorArrayExpressi
 	}
 
 	return true
+}
+
+// Validate checks all the validation constraints that may be defined on `QueryEditorArrayExpression` fields for violations and returns them.
+func (resource QueryEditorArrayExpression) Validate() error {
+	var errs cog.BuildErrors
+
+	for i1 := range resource.Expressions {
+		if err := resource.Expressions[i1].Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("expressions["+strconv.Itoa(i1)+"]", err)...)
+		}
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
 }
 
 type QueryEditorExpression = QueryEditorArrayExpressionOrQueryEditorPropertyExpressionOrQueryEditorGroupByExpressionOrQueryEditorFunctionExpressionOrQueryEditorFunctionParameterExpressionOrQueryEditorOperatorExpression
@@ -717,6 +1946,180 @@ func (resource CloudWatchLogsQuery) DataqueryType() string {
 	return "cloudwatch"
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `CloudWatchLogsQuery` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *CloudWatchLogsQuery) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "queryMode"
+	if fields["queryMode"] != nil {
+		if string(fields["queryMode"]) != "null" {
+			if err := json.Unmarshal(fields["queryMode"], &resource.QueryMode); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("queryMode", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("queryMode", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "queryMode")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("queryMode", errors.New("required field is missing from input"))...)
+	}
+	// Field "id"
+	if fields["id"] != nil {
+		if string(fields["id"]) != "null" {
+			if err := json.Unmarshal(fields["id"], &resource.Id); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("id", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("id", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "id")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("id", errors.New("required field is missing from input"))...)
+	}
+	// Field "region"
+	if fields["region"] != nil {
+		if string(fields["region"]) != "null" {
+			if err := json.Unmarshal(fields["region"], &resource.Region); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("region", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("region", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "region")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("region", errors.New("required field is missing from input"))...)
+	}
+	// Field "expression"
+	if fields["expression"] != nil {
+		if string(fields["expression"]) != "null" {
+			if err := json.Unmarshal(fields["expression"], &resource.Expression); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("expression", err)...)
+			}
+
+		}
+		delete(fields, "expression")
+
+	}
+	// Field "statsGroups"
+	if fields["statsGroups"] != nil {
+		if string(fields["statsGroups"]) != "null" {
+
+			if err := json.Unmarshal(fields["statsGroups"], &resource.StatsGroups); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("statsGroups", err)...)
+			}
+
+		}
+		delete(fields, "statsGroups")
+
+	}
+	// Field "logGroups"
+	if fields["logGroups"] != nil {
+		if string(fields["logGroups"]) != "null" {
+
+			partialArray := []json.RawMessage{}
+			if err := json.Unmarshal(fields["logGroups"], &partialArray); err != nil {
+				return err
+			}
+
+			for i1 := range partialArray {
+				var result1 LogGroup
+
+				result1 = LogGroup{}
+				if err := result1.UnmarshalJSONStrict(partialArray[i1]); err != nil {
+					errs = append(errs, cog.MakeBuildErrors("logGroups["+strconv.Itoa(i1)+"]", err)...)
+				}
+				resource.LogGroups = append(resource.LogGroups, result1)
+			}
+
+		}
+		delete(fields, "logGroups")
+
+	}
+	// Field "refId"
+	if fields["refId"] != nil {
+		if string(fields["refId"]) != "null" {
+			if err := json.Unmarshal(fields["refId"], &resource.RefId); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("refId", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("refId", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "refId")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("refId", errors.New("required field is missing from input"))...)
+	}
+	// Field "hide"
+	if fields["hide"] != nil {
+		if string(fields["hide"]) != "null" {
+			if err := json.Unmarshal(fields["hide"], &resource.Hide); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("hide", err)...)
+			}
+
+		}
+		delete(fields, "hide")
+
+	}
+	// Field "queryType"
+	if fields["queryType"] != nil {
+		if string(fields["queryType"]) != "null" {
+			if err := json.Unmarshal(fields["queryType"], &resource.QueryType); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("queryType", err)...)
+			}
+
+		}
+		delete(fields, "queryType")
+
+	}
+	// Field "logGroupNames"
+	if fields["logGroupNames"] != nil {
+		if string(fields["logGroupNames"]) != "null" {
+
+			if err := json.Unmarshal(fields["logGroupNames"], &resource.LogGroupNames); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("logGroupNames", err)...)
+			}
+
+		}
+		delete(fields, "logGroupNames")
+
+	}
+	// Field "datasource"
+	if fields["datasource"] != nil {
+		if string(fields["datasource"]) != "null" {
+
+			resource.Datasource = &dashboard.DataSourceRef{}
+			if err := resource.Datasource.UnmarshalJSONStrict(fields["datasource"]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("datasource", err)...)
+			}
+
+		}
+		delete(fields, "datasource")
+
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("CloudWatchLogsQuery", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two dataqueries.
 func (resource CloudWatchLogsQuery) Equals(otherCandidate variants.Dataquery) bool {
 	if otherCandidate == nil {
 		return false
@@ -808,6 +2211,28 @@ func (resource CloudWatchLogsQuery) Equals(otherCandidate variants.Dataquery) bo
 	return true
 }
 
+// Validate checks all the validation constraints that may be defined on `CloudWatchLogsQuery` fields for violations and returns them.
+func (resource CloudWatchLogsQuery) Validate() error {
+	var errs cog.BuildErrors
+
+	for i1 := range resource.LogGroups {
+		if err := resource.LogGroups[i1].Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("logGroups["+strconv.Itoa(i1)+"]", err)...)
+		}
+	}
+	if resource.Datasource != nil {
+		if err := resource.Datasource.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("datasource", err)...)
+		}
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 type LogGroup struct {
 	// ARN of the log group
 	Arn string `json:"arn"`
@@ -819,6 +2244,81 @@ type LogGroup struct {
 	AccountLabel *string `json:"accountLabel,omitempty"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `LogGroup` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *LogGroup) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "arn"
+	if fields["arn"] != nil {
+		if string(fields["arn"]) != "null" {
+			if err := json.Unmarshal(fields["arn"], &resource.Arn); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("arn", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("arn", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "arn")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("arn", errors.New("required field is missing from input"))...)
+	}
+	// Field "name"
+	if fields["name"] != nil {
+		if string(fields["name"]) != "null" {
+			if err := json.Unmarshal(fields["name"], &resource.Name); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("name", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("name", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "name")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("name", errors.New("required field is missing from input"))...)
+	}
+	// Field "accountId"
+	if fields["accountId"] != nil {
+		if string(fields["accountId"]) != "null" {
+			if err := json.Unmarshal(fields["accountId"], &resource.AccountId); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("accountId", err)...)
+			}
+
+		}
+		delete(fields, "accountId")
+
+	}
+	// Field "accountLabel"
+	if fields["accountLabel"] != nil {
+		if string(fields["accountLabel"]) != "null" {
+			if err := json.Unmarshal(fields["accountLabel"], &resource.AccountLabel); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("accountLabel", err)...)
+			}
+
+		}
+		delete(fields, "accountLabel")
+
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("LogGroup", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two `LogGroup` objects.
 func (resource LogGroup) Equals(other LogGroup) bool {
 	if resource.Arn != other.Arn {
 		return false
@@ -846,6 +2346,11 @@ func (resource LogGroup) Equals(other LogGroup) bool {
 	}
 
 	return true
+}
+
+// Validate checks all the validation constraints that may be defined on `LogGroup` fields for violations and returns them.
+func (resource LogGroup) Validate() error {
+	return nil
 }
 
 // Shape of a CloudWatch Annotation query
@@ -906,6 +2411,246 @@ func (resource CloudWatchAnnotationQuery) DataqueryType() string {
 	return "cloudwatch"
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `CloudWatchAnnotationQuery` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *CloudWatchAnnotationQuery) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "queryMode"
+	if fields["queryMode"] != nil {
+		if string(fields["queryMode"]) != "null" {
+			if err := json.Unmarshal(fields["queryMode"], &resource.QueryMode); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("queryMode", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("queryMode", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "queryMode")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("queryMode", errors.New("required field is missing from input"))...)
+	}
+	// Field "prefixMatching"
+	if fields["prefixMatching"] != nil {
+		if string(fields["prefixMatching"]) != "null" {
+			if err := json.Unmarshal(fields["prefixMatching"], &resource.PrefixMatching); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("prefixMatching", err)...)
+			}
+
+		}
+		delete(fields, "prefixMatching")
+
+	}
+	// Field "actionPrefix"
+	if fields["actionPrefix"] != nil {
+		if string(fields["actionPrefix"]) != "null" {
+			if err := json.Unmarshal(fields["actionPrefix"], &resource.ActionPrefix); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("actionPrefix", err)...)
+			}
+
+		}
+		delete(fields, "actionPrefix")
+
+	}
+	// Field "refId"
+	if fields["refId"] != nil {
+		if string(fields["refId"]) != "null" {
+			if err := json.Unmarshal(fields["refId"], &resource.RefId); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("refId", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("refId", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "refId")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("refId", errors.New("required field is missing from input"))...)
+	}
+	// Field "hide"
+	if fields["hide"] != nil {
+		if string(fields["hide"]) != "null" {
+			if err := json.Unmarshal(fields["hide"], &resource.Hide); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("hide", err)...)
+			}
+
+		}
+		delete(fields, "hide")
+
+	}
+	// Field "queryType"
+	if fields["queryType"] != nil {
+		if string(fields["queryType"]) != "null" {
+			if err := json.Unmarshal(fields["queryType"], &resource.QueryType); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("queryType", err)...)
+			}
+
+		}
+		delete(fields, "queryType")
+
+	}
+	// Field "region"
+	if fields["region"] != nil {
+		if string(fields["region"]) != "null" {
+			if err := json.Unmarshal(fields["region"], &resource.Region); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("region", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("region", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "region")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("region", errors.New("required field is missing from input"))...)
+	}
+	// Field "namespace"
+	if fields["namespace"] != nil {
+		if string(fields["namespace"]) != "null" {
+			if err := json.Unmarshal(fields["namespace"], &resource.Namespace); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("namespace", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("namespace", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "namespace")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("namespace", errors.New("required field is missing from input"))...)
+	}
+	// Field "metricName"
+	if fields["metricName"] != nil {
+		if string(fields["metricName"]) != "null" {
+			if err := json.Unmarshal(fields["metricName"], &resource.MetricName); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("metricName", err)...)
+			}
+
+		}
+		delete(fields, "metricName")
+
+	}
+	// Field "dimensions"
+	if fields["dimensions"] != nil {
+		if string(fields["dimensions"]) != "null" {
+
+			partialMap := make(map[string]json.RawMessage)
+			if err := json.Unmarshal(fields["dimensions"], &partialMap); err != nil {
+				return err
+			}
+			parsedMap1 := make(map[string]StringOrArrayOfString, len(partialMap))
+			for key1 := range partialMap {
+				var result1 StringOrArrayOfString
+
+				result1 = StringOrArrayOfString{}
+				if err := result1.UnmarshalJSONStrict(partialMap[key1]); err != nil {
+					errs = append(errs, cog.MakeBuildErrors("dimensions["+key1+"]", err)...)
+				}
+				parsedMap1[key1] = result1
+			}
+			resource.Dimensions = cog.ToPtr(Dimensions(parsedMap1))
+
+		}
+		delete(fields, "dimensions")
+
+	}
+	// Field "matchExact"
+	if fields["matchExact"] != nil {
+		if string(fields["matchExact"]) != "null" {
+			if err := json.Unmarshal(fields["matchExact"], &resource.MatchExact); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("matchExact", err)...)
+			}
+
+		}
+		delete(fields, "matchExact")
+
+	}
+	// Field "period"
+	if fields["period"] != nil {
+		if string(fields["period"]) != "null" {
+			if err := json.Unmarshal(fields["period"], &resource.Period); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("period", err)...)
+			}
+
+		}
+		delete(fields, "period")
+
+	}
+	// Field "accountId"
+	if fields["accountId"] != nil {
+		if string(fields["accountId"]) != "null" {
+			if err := json.Unmarshal(fields["accountId"], &resource.AccountId); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("accountId", err)...)
+			}
+
+		}
+		delete(fields, "accountId")
+
+	}
+	// Field "statistic"
+	if fields["statistic"] != nil {
+		if string(fields["statistic"]) != "null" {
+			if err := json.Unmarshal(fields["statistic"], &resource.Statistic); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("statistic", err)...)
+			}
+
+		}
+		delete(fields, "statistic")
+
+	}
+	// Field "alarmNamePrefix"
+	if fields["alarmNamePrefix"] != nil {
+		if string(fields["alarmNamePrefix"]) != "null" {
+			if err := json.Unmarshal(fields["alarmNamePrefix"], &resource.AlarmNamePrefix); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("alarmNamePrefix", err)...)
+			}
+
+		}
+		delete(fields, "alarmNamePrefix")
+
+	}
+	// Field "datasource"
+	if fields["datasource"] != nil {
+		if string(fields["datasource"]) != "null" {
+
+			resource.Datasource = &dashboard.DataSourceRef{}
+			if err := resource.Datasource.UnmarshalJSONStrict(fields["datasource"]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("datasource", err)...)
+			}
+
+		}
+		delete(fields, "datasource")
+
+	}
+	// Field "statistics"
+	if fields["statistics"] != nil {
+		if string(fields["statistics"]) != "null" {
+
+			if err := json.Unmarshal(fields["statistics"], &resource.Statistics); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("statistics", err)...)
+			}
+
+		}
+		delete(fields, "statistics")
+
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("CloudWatchAnnotationQuery", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two dataqueries.
 func (resource CloudWatchAnnotationQuery) Equals(otherCandidate variants.Dataquery) bool {
 	if otherCandidate == nil {
 		return false
@@ -1056,8 +2801,26 @@ func (resource CloudWatchAnnotationQuery) Equals(otherCandidate variants.Dataque
 	return true
 }
 
+// Validate checks all the validation constraints that may be defined on `CloudWatchAnnotationQuery` fields for violations and returns them.
+func (resource CloudWatchAnnotationQuery) Validate() error {
+	var errs cog.BuildErrors
+	if resource.Datasource != nil {
+		if err := resource.Datasource.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("datasource", err)...)
+		}
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 type CloudWatchQuery = CloudWatchMetricsQueryOrCloudWatchLogsQueryOrCloudWatchAnnotationQuery
 
+// VariantConfig returns the configuration related to cloudwatch dataqueries.
+// This configuration describes how to unmarshal it, convert it to code, …
 func VariantConfig() variants.DataqueryConfig {
 	return variants.DataqueryConfig{
 		Identifier: "cloudwatch",
@@ -1069,6 +2832,35 @@ func VariantConfig() variants.DataqueryConfig {
 			}
 
 			return dataquery, nil
+		},
+		StrictDataqueryUnmarshaler: func(raw []byte) (variants.Dataquery, error) {
+			dataquery := &CloudWatchQuery{}
+
+			if err := dataquery.UnmarshalJSONStrict(raw); err != nil {
+				return nil, err
+			}
+
+			return dataquery, nil
+		},
+		GoConverter: func(input any) string {
+			var dataquery CloudWatchQuery
+			if cast, ok := input.(*CloudWatchQuery); ok {
+				dataquery = *cast
+			} else {
+				dataquery = input.(CloudWatchQuery)
+			}
+
+			if dataquery.CloudWatchMetricsQuery != nil {
+				return CloudWatchMetricsQueryConverter(*dataquery.CloudWatchMetricsQuery)
+			}
+			if dataquery.CloudWatchLogsQuery != nil {
+				return CloudWatchLogsQueryConverter(*dataquery.CloudWatchLogsQuery)
+			}
+			if dataquery.CloudWatchAnnotationQuery != nil {
+				return CloudWatchAnnotationQueryConverter(*dataquery.CloudWatchAnnotationQuery)
+			}
+
+			return ""
 		},
 	}
 }
@@ -1085,6 +2877,7 @@ type StringOrArrayOfString struct {
 	ArrayOfString []string `json:"ArrayOfString,omitempty"`
 }
 
+// MarshalJSON implements a custom JSON marshalling logic to encode `StringOrArrayOfString` as JSON.
 func (resource StringOrArrayOfString) MarshalJSON() ([]byte, error) {
 	if resource.String != nil {
 		return json.Marshal(resource.String)
@@ -1097,6 +2890,7 @@ func (resource StringOrArrayOfString) MarshalJSON() ([]byte, error) {
 	return nil, fmt.Errorf("no value for disjunction of scalars")
 }
 
+// UnmarshalJSON implements a custom JSON unmarshalling logic to decode `StringOrArrayOfString` from JSON.
 func (resource *StringOrArrayOfString) UnmarshalJSON(raw []byte) error {
 	if raw == nil {
 		return nil
@@ -1127,6 +2921,47 @@ func (resource *StringOrArrayOfString) UnmarshalJSON(raw []byte) error {
 	return errors.Join(errList...)
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `StringOrArrayOfString` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *StringOrArrayOfString) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+	var errList []error
+
+	// String
+	var String string
+
+	if err := json.Unmarshal(raw, &String); err != nil {
+		errList = append(errList, err)
+	} else {
+		resource.String = &String
+		return nil
+	}
+
+	// ArrayOfString
+	var ArrayOfString []string
+
+	if err := json.Unmarshal(raw, &ArrayOfString); err != nil {
+		errList = append(errList, err)
+	} else {
+		resource.ArrayOfString = ArrayOfString
+		return nil
+	}
+
+	if len(errList) != 0 {
+		errs = append(errs, cog.MakeBuildErrors("StringOrArrayOfString", errors.Join(errList...))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two `StringOrArrayOfString` objects.
 func (resource StringOrArrayOfString) Equals(other StringOrArrayOfString) bool {
 	if resource.String == nil && other.String != nil || resource.String != nil && other.String == nil {
 		return false
@@ -1151,11 +2986,17 @@ func (resource StringOrArrayOfString) Equals(other StringOrArrayOfString) bool {
 	return true
 }
 
+// Validate checks all the validation constraints that may be defined on `StringOrArrayOfString` fields for violations and returns them.
+func (resource StringOrArrayOfString) Validate() error {
+	return nil
+}
+
 type QueryEditorPropertyExpressionOrQueryEditorFunctionExpression struct {
 	QueryEditorPropertyExpression *QueryEditorPropertyExpression `json:"QueryEditorPropertyExpression,omitempty"`
 	QueryEditorFunctionExpression *QueryEditorFunctionExpression `json:"QueryEditorFunctionExpression,omitempty"`
 }
 
+// MarshalJSON implements a custom JSON marshalling logic to encode `QueryEditorPropertyExpressionOrQueryEditorFunctionExpression` as JSON.
 func (resource QueryEditorPropertyExpressionOrQueryEditorFunctionExpression) MarshalJSON() ([]byte, error) {
 	if resource.QueryEditorPropertyExpression != nil {
 		return json.Marshal(resource.QueryEditorPropertyExpression)
@@ -1167,6 +3008,7 @@ func (resource QueryEditorPropertyExpressionOrQueryEditorFunctionExpression) Mar
 	return nil, fmt.Errorf("no value for disjunction of refs")
 }
 
+// UnmarshalJSON implements a custom JSON unmarshalling logic to decode `QueryEditorPropertyExpressionOrQueryEditorFunctionExpression` from JSON.
 func (resource *QueryEditorPropertyExpressionOrQueryEditorFunctionExpression) UnmarshalJSON(raw []byte) error {
 	if raw == nil {
 		return nil
@@ -1205,6 +3047,46 @@ func (resource *QueryEditorPropertyExpressionOrQueryEditorFunctionExpression) Un
 	return fmt.Errorf("could not unmarshal resource with `type = %v`", discriminator)
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `QueryEditorPropertyExpressionOrQueryEditorFunctionExpression` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *QueryEditorPropertyExpressionOrQueryEditorFunctionExpression) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	// FIXME: this is wasteful, we need to find a more efficient way to unmarshal this.
+	parsedAsMap := make(map[string]any)
+	if err := json.Unmarshal(raw, &parsedAsMap); err != nil {
+		return err
+	}
+
+	discriminator, found := parsedAsMap["type"]
+	if !found {
+		return fmt.Errorf("discriminator field 'type' not found in payload")
+	}
+
+	switch discriminator {
+	case "function":
+		queryEditorFunctionExpression := &QueryEditorFunctionExpression{}
+		if err := queryEditorFunctionExpression.UnmarshalJSONStrict(raw); err != nil {
+			return err
+		}
+
+		resource.QueryEditorFunctionExpression = queryEditorFunctionExpression
+		return nil
+	case "property":
+		queryEditorPropertyExpression := &QueryEditorPropertyExpression{}
+		if err := queryEditorPropertyExpression.UnmarshalJSONStrict(raw); err != nil {
+			return err
+		}
+
+		resource.QueryEditorPropertyExpression = queryEditorPropertyExpression
+		return nil
+	}
+
+	return fmt.Errorf("could not unmarshal resource with `type = %v`", discriminator)
+}
+
+// Equals tests the equality of two `QueryEditorPropertyExpressionOrQueryEditorFunctionExpression` objects.
 func (resource QueryEditorPropertyExpressionOrQueryEditorFunctionExpression) Equals(other QueryEditorPropertyExpressionOrQueryEditorFunctionExpression) bool {
 	if resource.QueryEditorPropertyExpression == nil && other.QueryEditorPropertyExpression != nil || resource.QueryEditorPropertyExpression != nil && other.QueryEditorPropertyExpression == nil {
 		return false
@@ -1228,6 +3110,27 @@ func (resource QueryEditorPropertyExpressionOrQueryEditorFunctionExpression) Equ
 	return true
 }
 
+// Validate checks all the validation constraints that may be defined on `QueryEditorPropertyExpressionOrQueryEditorFunctionExpression` fields for violations and returns them.
+func (resource QueryEditorPropertyExpressionOrQueryEditorFunctionExpression) Validate() error {
+	var errs cog.BuildErrors
+	if resource.QueryEditorPropertyExpression != nil {
+		if err := resource.QueryEditorPropertyExpression.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("QueryEditorPropertyExpression", err)...)
+		}
+	}
+	if resource.QueryEditorFunctionExpression != nil {
+		if err := resource.QueryEditorFunctionExpression.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("QueryEditorFunctionExpression", err)...)
+		}
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 type StringOrBoolOrInt64OrArrayOfQueryEditorOperatorType struct {
 	String                         *string                   `json:"String,omitempty"`
 	Bool                           *bool                     `json:"Bool,omitempty"`
@@ -1235,6 +3138,7 @@ type StringOrBoolOrInt64OrArrayOfQueryEditorOperatorType struct {
 	ArrayOfQueryEditorOperatorType []QueryEditorOperatorType `json:"ArrayOfQueryEditorOperatorType,omitempty"`
 }
 
+// MarshalJSON implements a custom JSON marshalling logic to encode `StringOrBoolOrInt64OrArrayOfQueryEditorOperatorType` as JSON.
 func (resource StringOrBoolOrInt64OrArrayOfQueryEditorOperatorType) MarshalJSON() ([]byte, error) {
 	if resource.String != nil {
 		return json.Marshal(resource.String)
@@ -1255,6 +3159,7 @@ func (resource StringOrBoolOrInt64OrArrayOfQueryEditorOperatorType) MarshalJSON(
 	return nil, fmt.Errorf("no value for disjunction of scalars")
 }
 
+// UnmarshalJSON implements a custom JSON unmarshalling logic to decode `StringOrBoolOrInt64OrArrayOfQueryEditorOperatorType` from JSON.
 func (resource *StringOrBoolOrInt64OrArrayOfQueryEditorOperatorType) UnmarshalJSON(raw []byte) error {
 	if raw == nil {
 		return nil
@@ -1305,6 +3210,67 @@ func (resource *StringOrBoolOrInt64OrArrayOfQueryEditorOperatorType) UnmarshalJS
 	return errors.Join(errList...)
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `StringOrBoolOrInt64OrArrayOfQueryEditorOperatorType` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *StringOrBoolOrInt64OrArrayOfQueryEditorOperatorType) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+	var errList []error
+
+	// String
+	var String string
+
+	if err := json.Unmarshal(raw, &String); err != nil {
+		errList = append(errList, err)
+	} else {
+		resource.String = &String
+		return nil
+	}
+
+	// Bool
+	var Bool bool
+
+	if err := json.Unmarshal(raw, &Bool); err != nil {
+		errList = append(errList, err)
+	} else {
+		resource.Bool = &Bool
+		return nil
+	}
+
+	// Int64
+	var Int64 int64
+
+	if err := json.Unmarshal(raw, &Int64); err != nil {
+		errList = append(errList, err)
+	} else {
+		resource.Int64 = &Int64
+		return nil
+	}
+
+	// ArrayOfQueryEditorOperatorType
+	var ArrayOfQueryEditorOperatorType []QueryEditorOperatorType
+
+	if err := json.Unmarshal(raw, &ArrayOfQueryEditorOperatorType); err != nil {
+		errList = append(errList, err)
+	} else {
+		resource.ArrayOfQueryEditorOperatorType = ArrayOfQueryEditorOperatorType
+		return nil
+	}
+
+	if len(errList) != 0 {
+		errs = append(errs, cog.MakeBuildErrors("StringOrBoolOrInt64OrArrayOfQueryEditorOperatorType", errors.Join(errList...))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two `StringOrBoolOrInt64OrArrayOfQueryEditorOperatorType` objects.
 func (resource StringOrBoolOrInt64OrArrayOfQueryEditorOperatorType) Equals(other StringOrBoolOrInt64OrArrayOfQueryEditorOperatorType) bool {
 	if resource.String == nil && other.String != nil || resource.String != nil && other.String == nil {
 		return false
@@ -1347,12 +3313,30 @@ func (resource StringOrBoolOrInt64OrArrayOfQueryEditorOperatorType) Equals(other
 	return true
 }
 
+// Validate checks all the validation constraints that may be defined on `StringOrBoolOrInt64OrArrayOfQueryEditorOperatorType` fields for violations and returns them.
+func (resource StringOrBoolOrInt64OrArrayOfQueryEditorOperatorType) Validate() error {
+	var errs cog.BuildErrors
+
+	for i1 := range resource.ArrayOfQueryEditorOperatorType {
+		if err := resource.ArrayOfQueryEditorOperatorType[i1].Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("ArrayOfQueryEditorOperatorType["+strconv.Itoa(i1)+"]", err)...)
+		}
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 type StringOrBoolOrInt64 struct {
 	String *string `json:"String,omitempty"`
 	Bool   *bool   `json:"Bool,omitempty"`
 	Int64  *int64  `json:"Int64,omitempty"`
 }
 
+// MarshalJSON implements a custom JSON marshalling logic to encode `StringOrBoolOrInt64` as JSON.
 func (resource StringOrBoolOrInt64) MarshalJSON() ([]byte, error) {
 	if resource.String != nil {
 		return json.Marshal(resource.String)
@@ -1369,6 +3353,7 @@ func (resource StringOrBoolOrInt64) MarshalJSON() ([]byte, error) {
 	return nil, fmt.Errorf("no value for disjunction of scalars")
 }
 
+// UnmarshalJSON implements a custom JSON unmarshalling logic to decode `StringOrBoolOrInt64` from JSON.
 func (resource *StringOrBoolOrInt64) UnmarshalJSON(raw []byte) error {
 	if raw == nil {
 		return nil
@@ -1409,6 +3394,57 @@ func (resource *StringOrBoolOrInt64) UnmarshalJSON(raw []byte) error {
 	return errors.Join(errList...)
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `StringOrBoolOrInt64` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *StringOrBoolOrInt64) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+	var errList []error
+
+	// String
+	var String string
+
+	if err := json.Unmarshal(raw, &String); err != nil {
+		errList = append(errList, err)
+	} else {
+		resource.String = &String
+		return nil
+	}
+
+	// Bool
+	var Bool bool
+
+	if err := json.Unmarshal(raw, &Bool); err != nil {
+		errList = append(errList, err)
+	} else {
+		resource.Bool = &Bool
+		return nil
+	}
+
+	// Int64
+	var Int64 int64
+
+	if err := json.Unmarshal(raw, &Int64); err != nil {
+		errList = append(errList, err)
+	} else {
+		resource.Int64 = &Int64
+		return nil
+	}
+
+	if len(errList) != 0 {
+		errs = append(errs, cog.MakeBuildErrors("StringOrBoolOrInt64", errors.Join(errList...))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two `StringOrBoolOrInt64` objects.
 func (resource StringOrBoolOrInt64) Equals(other StringOrBoolOrInt64) bool {
 	if resource.String == nil && other.String != nil || resource.String != nil && other.String == nil {
 		return false
@@ -1441,6 +3477,11 @@ func (resource StringOrBoolOrInt64) Equals(other StringOrBoolOrInt64) bool {
 	return true
 }
 
+// Validate checks all the validation constraints that may be defined on `StringOrBoolOrInt64` fields for violations and returns them.
+func (resource StringOrBoolOrInt64) Validate() error {
+	return nil
+}
+
 type QueryEditorArrayExpressionOrQueryEditorPropertyExpressionOrQueryEditorGroupByExpressionOrQueryEditorFunctionExpressionOrQueryEditorFunctionParameterExpressionOrQueryEditorOperatorExpression struct {
 	QueryEditorArrayExpression             *QueryEditorArrayExpression             `json:"QueryEditorArrayExpression,omitempty"`
 	QueryEditorPropertyExpression          *QueryEditorPropertyExpression          `json:"QueryEditorPropertyExpression,omitempty"`
@@ -1450,6 +3491,7 @@ type QueryEditorArrayExpressionOrQueryEditorPropertyExpressionOrQueryEditorGroup
 	QueryEditorOperatorExpression          *QueryEditorOperatorExpression          `json:"QueryEditorOperatorExpression,omitempty"`
 }
 
+// MarshalJSON implements a custom JSON marshalling logic to encode `QueryEditorArrayExpressionOrQueryEditorPropertyExpressionOrQueryEditorGroupByExpressionOrQueryEditorFunctionExpressionOrQueryEditorFunctionParameterExpressionOrQueryEditorOperatorExpression` as JSON.
 func (resource QueryEditorArrayExpressionOrQueryEditorPropertyExpressionOrQueryEditorGroupByExpressionOrQueryEditorFunctionExpressionOrQueryEditorFunctionParameterExpressionOrQueryEditorOperatorExpression) MarshalJSON() ([]byte, error) {
 	if resource.QueryEditorArrayExpression != nil {
 		return json.Marshal(resource.QueryEditorArrayExpression)
@@ -1473,6 +3515,7 @@ func (resource QueryEditorArrayExpressionOrQueryEditorPropertyExpressionOrQueryE
 	return nil, fmt.Errorf("no value for disjunction of refs")
 }
 
+// UnmarshalJSON implements a custom JSON unmarshalling logic to decode `QueryEditorArrayExpressionOrQueryEditorPropertyExpressionOrQueryEditorGroupByExpressionOrQueryEditorFunctionExpressionOrQueryEditorFunctionParameterExpressionOrQueryEditorOperatorExpression` from JSON.
 func (resource *QueryEditorArrayExpressionOrQueryEditorPropertyExpressionOrQueryEditorGroupByExpressionOrQueryEditorFunctionExpressionOrQueryEditorFunctionParameterExpressionOrQueryEditorOperatorExpression) UnmarshalJSON(raw []byte) error {
 	if raw == nil {
 		return nil
@@ -1551,6 +3594,86 @@ func (resource *QueryEditorArrayExpressionOrQueryEditorPropertyExpressionOrQuery
 	return fmt.Errorf("could not unmarshal resource with `type = %v`", discriminator)
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `QueryEditorArrayExpressionOrQueryEditorPropertyExpressionOrQueryEditorGroupByExpressionOrQueryEditorFunctionExpressionOrQueryEditorFunctionParameterExpressionOrQueryEditorOperatorExpression` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *QueryEditorArrayExpressionOrQueryEditorPropertyExpressionOrQueryEditorGroupByExpressionOrQueryEditorFunctionExpressionOrQueryEditorFunctionParameterExpressionOrQueryEditorOperatorExpression) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	// FIXME: this is wasteful, we need to find a more efficient way to unmarshal this.
+	parsedAsMap := make(map[string]any)
+	if err := json.Unmarshal(raw, &parsedAsMap); err != nil {
+		return err
+	}
+
+	discriminator, found := parsedAsMap["type"]
+	if !found {
+		return fmt.Errorf("discriminator field 'type' not found in payload")
+	}
+
+	switch discriminator {
+	case "and":
+		queryEditorArrayExpression := &QueryEditorArrayExpression{}
+		if err := queryEditorArrayExpression.UnmarshalJSONStrict(raw); err != nil {
+			return err
+		}
+
+		resource.QueryEditorArrayExpression = queryEditorArrayExpression
+		return nil
+	case "function":
+		queryEditorFunctionExpression := &QueryEditorFunctionExpression{}
+		if err := queryEditorFunctionExpression.UnmarshalJSONStrict(raw); err != nil {
+			return err
+		}
+
+		resource.QueryEditorFunctionExpression = queryEditorFunctionExpression
+		return nil
+	case "functionParameter":
+		queryEditorFunctionParameterExpression := &QueryEditorFunctionParameterExpression{}
+		if err := queryEditorFunctionParameterExpression.UnmarshalJSONStrict(raw); err != nil {
+			return err
+		}
+
+		resource.QueryEditorFunctionParameterExpression = queryEditorFunctionParameterExpression
+		return nil
+	case "groupBy":
+		queryEditorGroupByExpression := &QueryEditorGroupByExpression{}
+		if err := queryEditorGroupByExpression.UnmarshalJSONStrict(raw); err != nil {
+			return err
+		}
+
+		resource.QueryEditorGroupByExpression = queryEditorGroupByExpression
+		return nil
+	case "operator":
+		queryEditorOperatorExpression := &QueryEditorOperatorExpression{}
+		if err := queryEditorOperatorExpression.UnmarshalJSONStrict(raw); err != nil {
+			return err
+		}
+
+		resource.QueryEditorOperatorExpression = queryEditorOperatorExpression
+		return nil
+	case "or":
+		queryEditorArrayExpression := &QueryEditorArrayExpression{}
+		if err := queryEditorArrayExpression.UnmarshalJSONStrict(raw); err != nil {
+			return err
+		}
+
+		resource.QueryEditorArrayExpression = queryEditorArrayExpression
+		return nil
+	case "property":
+		queryEditorPropertyExpression := &QueryEditorPropertyExpression{}
+		if err := queryEditorPropertyExpression.UnmarshalJSONStrict(raw); err != nil {
+			return err
+		}
+
+		resource.QueryEditorPropertyExpression = queryEditorPropertyExpression
+		return nil
+	}
+
+	return fmt.Errorf("could not unmarshal resource with `type = %v`", discriminator)
+}
+
+// Equals tests the equality of two `QueryEditorArrayExpressionOrQueryEditorPropertyExpressionOrQueryEditorGroupByExpressionOrQueryEditorFunctionExpressionOrQueryEditorFunctionParameterExpressionOrQueryEditorOperatorExpression` objects.
 func (resource QueryEditorArrayExpressionOrQueryEditorPropertyExpressionOrQueryEditorGroupByExpressionOrQueryEditorFunctionExpressionOrQueryEditorFunctionParameterExpressionOrQueryEditorOperatorExpression) Equals(other QueryEditorArrayExpressionOrQueryEditorPropertyExpressionOrQueryEditorGroupByExpressionOrQueryEditorFunctionExpressionOrQueryEditorFunctionParameterExpressionOrQueryEditorOperatorExpression) bool {
 	if resource.QueryEditorArrayExpression == nil && other.QueryEditorArrayExpression != nil || resource.QueryEditorArrayExpression != nil && other.QueryEditorArrayExpression == nil {
 		return false
@@ -1610,6 +3733,47 @@ func (resource QueryEditorArrayExpressionOrQueryEditorPropertyExpressionOrQueryE
 	return true
 }
 
+// Validate checks all the validation constraints that may be defined on `QueryEditorArrayExpressionOrQueryEditorPropertyExpressionOrQueryEditorGroupByExpressionOrQueryEditorFunctionExpressionOrQueryEditorFunctionParameterExpressionOrQueryEditorOperatorExpression` fields for violations and returns them.
+func (resource QueryEditorArrayExpressionOrQueryEditorPropertyExpressionOrQueryEditorGroupByExpressionOrQueryEditorFunctionExpressionOrQueryEditorFunctionParameterExpressionOrQueryEditorOperatorExpression) Validate() error {
+	var errs cog.BuildErrors
+	if resource.QueryEditorArrayExpression != nil {
+		if err := resource.QueryEditorArrayExpression.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("QueryEditorArrayExpression", err)...)
+		}
+	}
+	if resource.QueryEditorPropertyExpression != nil {
+		if err := resource.QueryEditorPropertyExpression.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("QueryEditorPropertyExpression", err)...)
+		}
+	}
+	if resource.QueryEditorGroupByExpression != nil {
+		if err := resource.QueryEditorGroupByExpression.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("QueryEditorGroupByExpression", err)...)
+		}
+	}
+	if resource.QueryEditorFunctionExpression != nil {
+		if err := resource.QueryEditorFunctionExpression.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("QueryEditorFunctionExpression", err)...)
+		}
+	}
+	if resource.QueryEditorFunctionParameterExpression != nil {
+		if err := resource.QueryEditorFunctionParameterExpression.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("QueryEditorFunctionParameterExpression", err)...)
+		}
+	}
+	if resource.QueryEditorOperatorExpression != nil {
+		if err := resource.QueryEditorOperatorExpression.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("QueryEditorOperatorExpression", err)...)
+		}
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 type CloudWatchMetricsQueryOrCloudWatchLogsQueryOrCloudWatchAnnotationQuery struct {
 	CloudWatchMetricsQuery    *CloudWatchMetricsQuery    `json:"CloudWatchMetricsQuery,omitempty"`
 	CloudWatchLogsQuery       *CloudWatchLogsQuery       `json:"CloudWatchLogsQuery,omitempty"`
@@ -1623,6 +3787,7 @@ func (resource CloudWatchMetricsQueryOrCloudWatchLogsQueryOrCloudWatchAnnotation
 	return "cloudwatch"
 }
 
+// MarshalJSON implements a custom JSON marshalling logic to encode `CloudWatchMetricsQueryOrCloudWatchLogsQueryOrCloudWatchAnnotationQuery` as JSON.
 func (resource CloudWatchMetricsQueryOrCloudWatchLogsQueryOrCloudWatchAnnotationQuery) MarshalJSON() ([]byte, error) {
 	if resource.CloudWatchMetricsQuery != nil {
 		return json.Marshal(resource.CloudWatchMetricsQuery)
@@ -1637,6 +3802,7 @@ func (resource CloudWatchMetricsQueryOrCloudWatchLogsQueryOrCloudWatchAnnotation
 	return nil, fmt.Errorf("no value for disjunction of refs")
 }
 
+// UnmarshalJSON implements a custom JSON unmarshalling logic to decode `CloudWatchMetricsQueryOrCloudWatchLogsQueryOrCloudWatchAnnotationQuery` from JSON.
 func (resource *CloudWatchMetricsQueryOrCloudWatchLogsQueryOrCloudWatchAnnotationQuery) UnmarshalJSON(raw []byte) error {
 	if raw == nil {
 		return nil
@@ -1683,6 +3849,54 @@ func (resource *CloudWatchMetricsQueryOrCloudWatchLogsQueryOrCloudWatchAnnotatio
 	return fmt.Errorf("could not unmarshal resource with `queryMode = %v`", discriminator)
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `CloudWatchMetricsQueryOrCloudWatchLogsQueryOrCloudWatchAnnotationQuery` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *CloudWatchMetricsQueryOrCloudWatchLogsQueryOrCloudWatchAnnotationQuery) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	// FIXME: this is wasteful, we need to find a more efficient way to unmarshal this.
+	parsedAsMap := make(map[string]any)
+	if err := json.Unmarshal(raw, &parsedAsMap); err != nil {
+		return err
+	}
+
+	discriminator, found := parsedAsMap["queryMode"]
+	if !found {
+		return fmt.Errorf("discriminator field 'queryMode' not found in payload")
+	}
+
+	switch discriminator {
+	case "Annotations":
+		cloudWatchAnnotationQuery := &CloudWatchAnnotationQuery{}
+		if err := cloudWatchAnnotationQuery.UnmarshalJSONStrict(raw); err != nil {
+			return err
+		}
+
+		resource.CloudWatchAnnotationQuery = cloudWatchAnnotationQuery
+		return nil
+	case "Logs":
+		cloudWatchLogsQuery := &CloudWatchLogsQuery{}
+		if err := cloudWatchLogsQuery.UnmarshalJSONStrict(raw); err != nil {
+			return err
+		}
+
+		resource.CloudWatchLogsQuery = cloudWatchLogsQuery
+		return nil
+	case "Metrics":
+		cloudWatchMetricsQuery := &CloudWatchMetricsQuery{}
+		if err := cloudWatchMetricsQuery.UnmarshalJSONStrict(raw); err != nil {
+			return err
+		}
+
+		resource.CloudWatchMetricsQuery = cloudWatchMetricsQuery
+		return nil
+	}
+
+	return fmt.Errorf("could not unmarshal resource with `queryMode = %v`", discriminator)
+}
+
+// Equals tests the equality of two dataqueries.
 func (resource CloudWatchMetricsQueryOrCloudWatchLogsQueryOrCloudWatchAnnotationQuery) Equals(otherCandidate variants.Dataquery) bool {
 	if otherCandidate == nil {
 		return false
@@ -1721,4 +3935,30 @@ func (resource CloudWatchMetricsQueryOrCloudWatchLogsQueryOrCloudWatchAnnotation
 	}
 
 	return true
+}
+
+// Validate checks all the validation constraints that may be defined on `CloudWatchMetricsQueryOrCloudWatchLogsQueryOrCloudWatchAnnotationQuery` fields for violations and returns them.
+func (resource CloudWatchMetricsQueryOrCloudWatchLogsQueryOrCloudWatchAnnotationQuery) Validate() error {
+	var errs cog.BuildErrors
+	if resource.CloudWatchMetricsQuery != nil {
+		if err := resource.CloudWatchMetricsQuery.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("CloudWatchMetricsQuery", err)...)
+		}
+	}
+	if resource.CloudWatchLogsQuery != nil {
+		if err := resource.CloudWatchLogsQuery.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("CloudWatchLogsQuery", err)...)
+		}
+	}
+	if resource.CloudWatchAnnotationQuery != nil {
+		if err := resource.CloudWatchAnnotationQuery.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("CloudWatchAnnotationQuery", err)...)
+		}
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
 }

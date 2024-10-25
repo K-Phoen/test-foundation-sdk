@@ -1,0 +1,35 @@
+name: Publish documentation
+on:
+  workflow_dispatch: ~
+
+env:
+  DEVBOX_VERSION: 0.13.1
+
+jobs:
+  publish:
+    name: Publish
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install devbox
+        uses: jetify-com/devbox-install-action@v0.11.0
+        with:
+          enable-cache: 'true'
+          devbox-version: ${{ env.DEVBOX_VERSION }}
+
+      - name: Build documentation website
+        working-directory: .mkdocs
+        run: |
+          devbox run .mkdocs/build.sh
+
+      - name: Upload static files as artifact
+        id: deployment
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .mkdocs/site/
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

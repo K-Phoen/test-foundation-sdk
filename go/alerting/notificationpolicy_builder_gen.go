@@ -28,14 +28,8 @@ func NewNotificationPolicyBuilder() *NotificationPolicyBuilder {
 }
 
 func (builder *NotificationPolicyBuilder) Build() (NotificationPolicy, error) {
-	var errs cog.BuildErrors
-
-	for _, err := range builder.errors {
-		errs = append(errs, cog.MakeBuildErrors("NotificationPolicy", err)...)
-	}
-
-	if len(errs) != 0 {
-		return NotificationPolicy{}, errs
+	if err := builder.internal.Validate(); err != nil {
+		return NotificationPolicy{}, err
 	}
 
 	return *builder.internal, nil

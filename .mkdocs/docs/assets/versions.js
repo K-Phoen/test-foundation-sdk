@@ -11,8 +11,8 @@ window.addEventListener("DOMContentLoaded", function() {
         return;
     }
 
-    const urlParts = window.location.pathname.split('/').filter(elm => elm !== "");
-    const currentVersionFromURL = urlParts.length !== 0 ? urlParts[0] : null;
+    const urlParts = __md_scope.pathname.split('/').filter(elm => elm !== "");
+    const currentVersionFromURL = urlParts.length !== 0 ? urlParts[urlParts.length-1] : null;
 
     const elementFromHTML = (htmlString) =>  {
         const div = document.createElement('div');
@@ -21,13 +21,13 @@ window.addEventListener("DOMContentLoaded", function() {
     };
 
     const urlForVersion = (url, version) => {
-        const currentVersionPrefix = '/'+currentVersionFromURL;
+        const currentVersionPrefix = __md_scope.pathname;
 
         if (currentVersionFromURL === null || !url.startsWith(currentVersionPrefix)) {
-            return '/'+version.version;
+            return __md_scope.pathname+'../'+version.version;
         }
 
-        return '/'+version.version+url.substring(currentVersionPrefix.length);
+        return __md_scope.pathname+'../'+version.version+'/'+url.substring(currentVersionPrefix.length);
     };
 
     const renderVersionSelector = (versions, currentVersion) => {
@@ -50,13 +50,13 @@ window.addEventListener("DOMContentLoaded", function() {
         return elementFromHTML(selector);
     };
 
-    fetch(config.base+'/versions.json').then((response) => {
+    fetch(config.base+'/../versions.json').then((response) => {
         return response.json();
     }).then((versions) => {
         const currentVersion = currentVersionFromURL || versions[0].version;
         const currentVersionObj = versions.find((version) => {
             return version.version === currentVersion;
-        })
+        }) || versions[0];
         topic[0].appendChild(renderVersionSelector(versions, currentVersionObj));
     });
 });

@@ -10,6 +10,8 @@ nav:
   - "Python": "./next+cog-v0.0.x/python/Reference/"
   - "Typescript": "./next+cog-v0.0.x/typescript/Reference/"
 
+plugins: []
+
 markdown_extensions:
   - admonition
   - pymdownx.magiclink
@@ -68,5 +70,3 @@ theme:
 extra_css:
   - "assets/custom.css"
 
-extra_javascript:
-  - "assets/versions.js"

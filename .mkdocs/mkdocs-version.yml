@@ -4,6 +4,9 @@ docs_dir: !ENV SOURCE_VERSION_FOLDER
 
 nav: ~
 
+plugins:
+  - search
+
 theme:
   logo: "../assets/logo.svg"
 

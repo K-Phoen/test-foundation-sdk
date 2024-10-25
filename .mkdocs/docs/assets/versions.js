@@ -4,6 +4,13 @@ window.addEventListener("DOMContentLoaded", function() {
         return;
     }
 
+    // grab some config from the page
+    const script = getElement("#__config");
+    const config = JSON.parse(script.textContent());
+    if (!config.base) {
+        return;
+    }
+
     const urlParts = window.location.pathname.split('/').filter(elm => elm !== "");
     const currentVersionFromURL = urlParts.length !== 0 ? urlParts[0] : null;
 
@@ -43,7 +50,7 @@ window.addEventListener("DOMContentLoaded", function() {
         return elementFromHTML(selector);
     };
 
-    fetch('/versions.json').then((response) => {
+    fetch(config.base+'/versions.json').then((response) => {
         return response.json();
     }).then((versions) => {
         const currentVersion = currentVersionFromURL || versions[0].version;

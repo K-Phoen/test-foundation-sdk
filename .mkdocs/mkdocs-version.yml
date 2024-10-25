@@ -4,11 +4,11 @@ docs_dir: !ENV SOURCE_VERSION_FOLDER
 
 nav: ~
 
-#theme:
-#  logo: "../../../../assets/logo.svg"
+theme:
+  logo: "../assets/logo.svg"
 
 extra_css:
-  - "../../../../assets/custom.css"
+  - "../assets/custom.css"
 
 extra_javascript:
-  - "../../../../assets/versions.js"
+  - "../assets/versions.js"

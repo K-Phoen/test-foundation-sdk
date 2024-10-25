@@ -6,7 +6,7 @@ window.addEventListener("DOMContentLoaded", function() {
 
     // grab some config from the page
     const script = document.getElementById("__config");
-    const config = JSON.parse(script.textContent());
+    const config = JSON.parse(script.textContent);
     if (!config.base) {
         return;
     }

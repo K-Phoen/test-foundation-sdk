@@ -28,14 +28,8 @@ func NewContactPointBuilder() *ContactPointBuilder {
 }
 
 func (builder *ContactPointBuilder) Build() (ContactPoint, error) {
-	var errs cog.BuildErrors
-
-	for _, err := range builder.errors {
-		errs = append(errs, cog.MakeBuildErrors("ContactPoint", err)...)
-	}
-
-	if len(errs) != 0 {
-		return ContactPoint{}, errs
+	if err := builder.internal.Validate(); err != nil {
+		return ContactPoint{}, err
 	}
 
 	return *builder.internal, nil

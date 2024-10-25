@@ -27,14 +27,8 @@ func NewRuleGroupBuilder(title string) *RuleGroupBuilder {
 }
 
 func (builder *RuleGroupBuilder) Build() (RuleGroup, error) {
-	var errs cog.BuildErrors
-
-	for _, err := range builder.errors {
-		errs = append(errs, cog.MakeBuildErrors("RuleGroup", err)...)
-	}
-
-	if len(errs) != 0 {
-		return RuleGroup{}, errs
+	if err := builder.internal.Validate(); err != nil {
+		return RuleGroup{}, err
 	}
 
 	return *builder.internal, nil

@@ -9,9 +9,6 @@ set -o nounset
 # Catch the error in case mysqldump fails (but gzip succeeds) in `mysqldump |gzip`
 set -o pipefail
 
-bold=$(tput bold)
-normal=$(tput sgr0)
-
 __dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 ${__dir}/pull-versions.sh

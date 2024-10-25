@@ -9,9 +9,6 @@ set -o nounset
 # Catch the error in case mysqldump fails (but gzip succeeds) in `mysqldump |gzip`
 set -o pipefail
 
-bold=$(tput bold)
-normal=$(tput sgr0)
-
 __dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${__dir}/versions.sh"
 
@@ -28,7 +25,7 @@ git clone "${FOUNDATION_SDK_REPO}" "${__dir}/tmp-foundation-sdk"
 for version in ${ALL_GRAFANA_VERSIONS//;/ } ; do
     full_version="${version}+cog-${COG_VERSION}"
 
-    echo "🪧 Pulling documentation for Foundation SDK version ${bold}${full_version}${normal}"
+    echo "🪧 Pulling documentation for Foundation SDK version ${full_version}"
 
     git -C "${__dir}/tmp-foundation-sdk" fetch origin "${full_version}"
     git -C "${__dir}/tmp-foundation-sdk" checkout "${full_version}"

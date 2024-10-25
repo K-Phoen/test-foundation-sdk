@@ -12,7 +12,7 @@ set -o pipefail
 __dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${__dir}/versions.sh"
 
-FOUNDATION_SDK_REPO=${FOUNDATION_SDK_REPO:-'git@github.com:K-Phoen/test-foundation-sdk.git'}
+FOUNDATION_SDK_REPO=${FOUNDATION_SDK_REPO:-'https://github.com/K-Phoen/test-foundation-sdk.git'}
 COG_VERSION="v0.0.x" # hardcoded for now
 
 # Cleanup potential leftovers from previous runs.

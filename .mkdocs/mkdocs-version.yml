@@ -10,6 +10,9 @@ plugins:
 theme:
   logo: "../assets/logo.svg"
 
+extra:
+  homepage: ../
+
 extra_css:
   - "../assets/custom.css"
 

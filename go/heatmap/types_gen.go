@@ -4,9 +4,13 @@ package heatmap
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 
+	cog "github.com/grafana/grafana-foundation-sdk/go/cog"
 	variants "github.com/grafana/grafana-foundation-sdk/go/cog/variants"
 	common "github.com/grafana/grafana-foundation-sdk/go/common"
+	dashboard "github.com/grafana/grafana-foundation-sdk/go/dashboard"
 )
 
 // Controls the color mode of the heatmap
@@ -56,6 +60,145 @@ type HeatmapColorOptions struct {
 	Max *float32 `json:"max,omitempty"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `HeatmapColorOptions` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *HeatmapColorOptions) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "mode"
+	if fields["mode"] != nil {
+		if string(fields["mode"]) != "null" {
+			if err := json.Unmarshal(fields["mode"], &resource.Mode); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("mode", err)...)
+			}
+
+		}
+		delete(fields, "mode")
+
+	}
+	// Field "scheme"
+	if fields["scheme"] != nil {
+		if string(fields["scheme"]) != "null" {
+			if err := json.Unmarshal(fields["scheme"], &resource.Scheme); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("scheme", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("scheme", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "scheme")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("scheme", errors.New("required field is missing from input"))...)
+	}
+	// Field "fill"
+	if fields["fill"] != nil {
+		if string(fields["fill"]) != "null" {
+			if err := json.Unmarshal(fields["fill"], &resource.Fill); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("fill", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("fill", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "fill")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("fill", errors.New("required field is missing from input"))...)
+	}
+	// Field "scale"
+	if fields["scale"] != nil {
+		if string(fields["scale"]) != "null" {
+			if err := json.Unmarshal(fields["scale"], &resource.Scale); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("scale", err)...)
+			}
+
+		}
+		delete(fields, "scale")
+
+	}
+	// Field "exponent"
+	if fields["exponent"] != nil {
+		if string(fields["exponent"]) != "null" {
+			if err := json.Unmarshal(fields["exponent"], &resource.Exponent); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("exponent", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("exponent", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "exponent")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("exponent", errors.New("required field is missing from input"))...)
+	}
+	// Field "steps"
+	if fields["steps"] != nil {
+		if string(fields["steps"]) != "null" {
+			if err := json.Unmarshal(fields["steps"], &resource.Steps); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("steps", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("steps", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "steps")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("steps", errors.New("required field is missing from input"))...)
+	}
+	// Field "reverse"
+	if fields["reverse"] != nil {
+		if string(fields["reverse"]) != "null" {
+			if err := json.Unmarshal(fields["reverse"], &resource.Reverse); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("reverse", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("reverse", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "reverse")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("reverse", errors.New("required field is missing from input"))...)
+	}
+	// Field "min"
+	if fields["min"] != nil {
+		if string(fields["min"]) != "null" {
+			if err := json.Unmarshal(fields["min"], &resource.Min); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("min", err)...)
+			}
+
+		}
+		delete(fields, "min")
+
+	}
+	// Field "max"
+	if fields["max"] != nil {
+		if string(fields["max"]) != "null" {
+			if err := json.Unmarshal(fields["max"], &resource.Max); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("max", err)...)
+			}
+
+		}
+		delete(fields, "max")
+
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("HeatmapColorOptions", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two `HeatmapColorOptions` objects.
 func (resource HeatmapColorOptions) Equals(other HeatmapColorOptions) bool {
 	if resource.Mode == nil && other.Mode != nil || resource.Mode != nil && other.Mode == nil {
 		return false
@@ -112,6 +255,29 @@ func (resource HeatmapColorOptions) Equals(other HeatmapColorOptions) bool {
 	return true
 }
 
+// Validate checks all the validation constraints that may be defined on `HeatmapColorOptions` fields for violations and returns them.
+func (resource HeatmapColorOptions) Validate() error {
+	var errs cog.BuildErrors
+	if !(resource.Steps >= 2) {
+		errs = append(errs, cog.MakeBuildErrors(
+			"steps",
+			errors.New("must be >= 2"),
+		)...)
+	}
+	if !(resource.Steps <= 128) {
+		errs = append(errs, cog.MakeBuildErrors(
+			"steps",
+			errors.New("must be <= 128"),
+		)...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 // Configuration options for the yAxis
 type YAxisConfig struct {
 	// Sets the yAxis unit
@@ -136,6 +302,198 @@ type YAxisConfig struct {
 	AxisBorderShow *bool    `json:"axisBorderShow,omitempty"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `YAxisConfig` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *YAxisConfig) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "unit"
+	if fields["unit"] != nil {
+		if string(fields["unit"]) != "null" {
+			if err := json.Unmarshal(fields["unit"], &resource.Unit); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("unit", err)...)
+			}
+
+		}
+		delete(fields, "unit")
+
+	}
+	// Field "reverse"
+	if fields["reverse"] != nil {
+		if string(fields["reverse"]) != "null" {
+			if err := json.Unmarshal(fields["reverse"], &resource.Reverse); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("reverse", err)...)
+			}
+
+		}
+		delete(fields, "reverse")
+
+	}
+	// Field "decimals"
+	if fields["decimals"] != nil {
+		if string(fields["decimals"]) != "null" {
+			if err := json.Unmarshal(fields["decimals"], &resource.Decimals); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("decimals", err)...)
+			}
+
+		}
+		delete(fields, "decimals")
+
+	}
+	// Field "min"
+	if fields["min"] != nil {
+		if string(fields["min"]) != "null" {
+			if err := json.Unmarshal(fields["min"], &resource.Min); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("min", err)...)
+			}
+
+		}
+		delete(fields, "min")
+
+	}
+	// Field "axisPlacement"
+	if fields["axisPlacement"] != nil {
+		if string(fields["axisPlacement"]) != "null" {
+			if err := json.Unmarshal(fields["axisPlacement"], &resource.AxisPlacement); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("axisPlacement", err)...)
+			}
+
+		}
+		delete(fields, "axisPlacement")
+
+	}
+	// Field "axisColorMode"
+	if fields["axisColorMode"] != nil {
+		if string(fields["axisColorMode"]) != "null" {
+			if err := json.Unmarshal(fields["axisColorMode"], &resource.AxisColorMode); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("axisColorMode", err)...)
+			}
+
+		}
+		delete(fields, "axisColorMode")
+
+	}
+	// Field "axisLabel"
+	if fields["axisLabel"] != nil {
+		if string(fields["axisLabel"]) != "null" {
+			if err := json.Unmarshal(fields["axisLabel"], &resource.AxisLabel); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("axisLabel", err)...)
+			}
+
+		}
+		delete(fields, "axisLabel")
+
+	}
+	// Field "axisWidth"
+	if fields["axisWidth"] != nil {
+		if string(fields["axisWidth"]) != "null" {
+			if err := json.Unmarshal(fields["axisWidth"], &resource.AxisWidth); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("axisWidth", err)...)
+			}
+
+		}
+		delete(fields, "axisWidth")
+
+	}
+	// Field "axisSoftMin"
+	if fields["axisSoftMin"] != nil {
+		if string(fields["axisSoftMin"]) != "null" {
+			if err := json.Unmarshal(fields["axisSoftMin"], &resource.AxisSoftMin); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("axisSoftMin", err)...)
+			}
+
+		}
+		delete(fields, "axisSoftMin")
+
+	}
+	// Field "axisSoftMax"
+	if fields["axisSoftMax"] != nil {
+		if string(fields["axisSoftMax"]) != "null" {
+			if err := json.Unmarshal(fields["axisSoftMax"], &resource.AxisSoftMax); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("axisSoftMax", err)...)
+			}
+
+		}
+		delete(fields, "axisSoftMax")
+
+	}
+	// Field "axisGridShow"
+	if fields["axisGridShow"] != nil {
+		if string(fields["axisGridShow"]) != "null" {
+			if err := json.Unmarshal(fields["axisGridShow"], &resource.AxisGridShow); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("axisGridShow", err)...)
+			}
+
+		}
+		delete(fields, "axisGridShow")
+
+	}
+	// Field "scaleDistribution"
+	if fields["scaleDistribution"] != nil {
+		if string(fields["scaleDistribution"]) != "null" {
+
+			resource.ScaleDistribution = &common.ScaleDistributionConfig{}
+			if err := resource.ScaleDistribution.UnmarshalJSONStrict(fields["scaleDistribution"]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("scaleDistribution", err)...)
+			}
+
+		}
+		delete(fields, "scaleDistribution")
+
+	}
+	// Field "axisCenteredZero"
+	if fields["axisCenteredZero"] != nil {
+		if string(fields["axisCenteredZero"]) != "null" {
+			if err := json.Unmarshal(fields["axisCenteredZero"], &resource.AxisCenteredZero); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("axisCenteredZero", err)...)
+			}
+
+		}
+		delete(fields, "axisCenteredZero")
+
+	}
+	// Field "max"
+	if fields["max"] != nil {
+		if string(fields["max"]) != "null" {
+			if err := json.Unmarshal(fields["max"], &resource.Max); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("max", err)...)
+			}
+
+		}
+		delete(fields, "max")
+
+	}
+	// Field "axisBorderShow"
+	if fields["axisBorderShow"] != nil {
+		if string(fields["axisBorderShow"]) != "null" {
+			if err := json.Unmarshal(fields["axisBorderShow"], &resource.AxisBorderShow); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("axisBorderShow", err)...)
+			}
+
+		}
+		delete(fields, "axisBorderShow")
+
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("YAxisConfig", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two `YAxisConfig` objects.
 func (resource YAxisConfig) Equals(other YAxisConfig) bool {
 	if resource.Unit == nil && other.Unit != nil || resource.Unit != nil && other.Unit == nil {
 		return false
@@ -276,6 +634,22 @@ func (resource YAxisConfig) Equals(other YAxisConfig) bool {
 	return true
 }
 
+// Validate checks all the validation constraints that may be defined on `YAxisConfig` fields for violations and returns them.
+func (resource YAxisConfig) Validate() error {
+	var errs cog.BuildErrors
+	if resource.ScaleDistribution != nil {
+		if err := resource.ScaleDistribution.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("scaleDistribution", err)...)
+		}
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 // Controls cell value options
 type CellValues struct {
 	// Controls the cell value unit
@@ -284,6 +658,53 @@ type CellValues struct {
 	Decimals *float32 `json:"decimals,omitempty"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `CellValues` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *CellValues) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "unit"
+	if fields["unit"] != nil {
+		if string(fields["unit"]) != "null" {
+			if err := json.Unmarshal(fields["unit"], &resource.Unit); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("unit", err)...)
+			}
+
+		}
+		delete(fields, "unit")
+
+	}
+	// Field "decimals"
+	if fields["decimals"] != nil {
+		if string(fields["decimals"]) != "null" {
+			if err := json.Unmarshal(fields["decimals"], &resource.Decimals); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("decimals", err)...)
+			}
+
+		}
+		delete(fields, "decimals")
+
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("CellValues", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two `CellValues` objects.
 func (resource CellValues) Equals(other CellValues) bool {
 	if resource.Unit == nil && other.Unit != nil || resource.Unit != nil && other.Unit == nil {
 		return false
@@ -307,6 +728,11 @@ func (resource CellValues) Equals(other CellValues) bool {
 	return true
 }
 
+// Validate checks all the validation constraints that may be defined on `CellValues` fields for violations and returns them.
+func (resource CellValues) Validate() error {
+	return nil
+}
+
 // Controls the value filter range
 type FilterValueRange struct {
 	// Sets the filter range to values less than or equal to the given value
@@ -315,6 +741,53 @@ type FilterValueRange struct {
 	Ge *float32 `json:"ge,omitempty"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `FilterValueRange` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *FilterValueRange) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "le"
+	if fields["le"] != nil {
+		if string(fields["le"]) != "null" {
+			if err := json.Unmarshal(fields["le"], &resource.Le); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("le", err)...)
+			}
+
+		}
+		delete(fields, "le")
+
+	}
+	// Field "ge"
+	if fields["ge"] != nil {
+		if string(fields["ge"]) != "null" {
+			if err := json.Unmarshal(fields["ge"], &resource.Ge); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("ge", err)...)
+			}
+
+		}
+		delete(fields, "ge")
+
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("FilterValueRange", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two `FilterValueRange` objects.
 func (resource FilterValueRange) Equals(other FilterValueRange) bool {
 	if resource.Le == nil && other.Le != nil || resource.Le != nil && other.Le == nil {
 		return false
@@ -338,6 +811,11 @@ func (resource FilterValueRange) Equals(other FilterValueRange) bool {
 	return true
 }
 
+// Validate checks all the validation constraints that may be defined on `FilterValueRange` fields for violations and returns them.
+func (resource FilterValueRange) Validate() error {
+	return nil
+}
+
 // Controls tooltip options
 type HeatmapTooltip struct {
 	// Controls how the tooltip is shown
@@ -350,6 +828,89 @@ type HeatmapTooltip struct {
 	ShowColorScale *bool `json:"showColorScale,omitempty"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `HeatmapTooltip` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *HeatmapTooltip) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "mode"
+	if fields["mode"] != nil {
+		if string(fields["mode"]) != "null" {
+			if err := json.Unmarshal(fields["mode"], &resource.Mode); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("mode", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("mode", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "mode")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("mode", errors.New("required field is missing from input"))...)
+	}
+	// Field "maxHeight"
+	if fields["maxHeight"] != nil {
+		if string(fields["maxHeight"]) != "null" {
+			if err := json.Unmarshal(fields["maxHeight"], &resource.MaxHeight); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("maxHeight", err)...)
+			}
+
+		}
+		delete(fields, "maxHeight")
+
+	}
+	// Field "maxWidth"
+	if fields["maxWidth"] != nil {
+		if string(fields["maxWidth"]) != "null" {
+			if err := json.Unmarshal(fields["maxWidth"], &resource.MaxWidth); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("maxWidth", err)...)
+			}
+
+		}
+		delete(fields, "maxWidth")
+
+	}
+	// Field "yHistogram"
+	if fields["yHistogram"] != nil {
+		if string(fields["yHistogram"]) != "null" {
+			if err := json.Unmarshal(fields["yHistogram"], &resource.YHistogram); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("yHistogram", err)...)
+			}
+
+		}
+		delete(fields, "yHistogram")
+
+	}
+	// Field "showColorScale"
+	if fields["showColorScale"] != nil {
+		if string(fields["showColorScale"]) != "null" {
+			if err := json.Unmarshal(fields["showColorScale"], &resource.ShowColorScale); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("showColorScale", err)...)
+			}
+
+		}
+		delete(fields, "showColorScale")
+
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("HeatmapTooltip", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two `HeatmapTooltip` objects.
 func (resource HeatmapTooltip) Equals(other HeatmapTooltip) bool {
 	if resource.Mode != other.Mode {
 		return false
@@ -394,12 +955,56 @@ func (resource HeatmapTooltip) Equals(other HeatmapTooltip) bool {
 	return true
 }
 
+// Validate checks all the validation constraints that may be defined on `HeatmapTooltip` fields for violations and returns them.
+func (resource HeatmapTooltip) Validate() error {
+	return nil
+}
+
 // Controls legend options
 type HeatmapLegend struct {
 	// Controls if the legend is shown
 	Show bool `json:"show"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `HeatmapLegend` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *HeatmapLegend) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "show"
+	if fields["show"] != nil {
+		if string(fields["show"]) != "null" {
+			if err := json.Unmarshal(fields["show"], &resource.Show); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("show", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("show", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "show")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("show", errors.New("required field is missing from input"))...)
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("HeatmapLegend", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two `HeatmapLegend` objects.
 func (resource HeatmapLegend) Equals(other HeatmapLegend) bool {
 	if resource.Show != other.Show {
 		return false
@@ -408,18 +1013,67 @@ func (resource HeatmapLegend) Equals(other HeatmapLegend) bool {
 	return true
 }
 
+// Validate checks all the validation constraints that may be defined on `HeatmapLegend` fields for violations and returns them.
+func (resource HeatmapLegend) Validate() error {
+	return nil
+}
+
 // Controls exemplar options
 type ExemplarConfig struct {
 	// Sets the color of the exemplar markers
 	Color string `json:"color"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `ExemplarConfig` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *ExemplarConfig) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "color"
+	if fields["color"] != nil {
+		if string(fields["color"]) != "null" {
+			if err := json.Unmarshal(fields["color"], &resource.Color); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("color", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("color", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "color")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("color", errors.New("required field is missing from input"))...)
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("ExemplarConfig", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two `ExemplarConfig` objects.
 func (resource ExemplarConfig) Equals(other ExemplarConfig) bool {
 	if resource.Color != other.Color {
 		return false
 	}
 
 	return true
+}
+
+// Validate checks all the validation constraints that may be defined on `ExemplarConfig` fields for violations and returns them.
+func (resource ExemplarConfig) Validate() error {
+	return nil
 }
 
 // Controls frame rows options
@@ -430,6 +1084,53 @@ type RowsHeatmapOptions struct {
 	Layout *common.HeatmapCellLayout `json:"layout,omitempty"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `RowsHeatmapOptions` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *RowsHeatmapOptions) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "value"
+	if fields["value"] != nil {
+		if string(fields["value"]) != "null" {
+			if err := json.Unmarshal(fields["value"], &resource.Value); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("value", err)...)
+			}
+
+		}
+		delete(fields, "value")
+
+	}
+	// Field "layout"
+	if fields["layout"] != nil {
+		if string(fields["layout"]) != "null" {
+			if err := json.Unmarshal(fields["layout"], &resource.Layout); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("layout", err)...)
+			}
+
+		}
+		delete(fields, "layout")
+
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("RowsHeatmapOptions", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two `RowsHeatmapOptions` objects.
 func (resource RowsHeatmapOptions) Equals(other RowsHeatmapOptions) bool {
 	if resource.Value == nil && other.Value != nil || resource.Value != nil && other.Value == nil {
 		return false
@@ -451,6 +1152,11 @@ func (resource RowsHeatmapOptions) Equals(other RowsHeatmapOptions) bool {
 	}
 
 	return true
+}
+
+// Validate checks all the validation constraints that may be defined on `RowsHeatmapOptions` fields for violations and returns them.
+func (resource RowsHeatmapOptions) Validate() error {
+	return nil
 }
 
 type Options struct {
@@ -490,6 +1196,221 @@ type Options struct {
 	SelectionMode *HeatmapSelectionMode `json:"selectionMode,omitempty"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `Options` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *Options) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "calculate"
+	if fields["calculate"] != nil {
+		if string(fields["calculate"]) != "null" {
+			if err := json.Unmarshal(fields["calculate"], &resource.Calculate); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("calculate", err)...)
+			}
+
+		}
+		delete(fields, "calculate")
+
+	}
+	// Field "calculation"
+	if fields["calculation"] != nil {
+		if string(fields["calculation"]) != "null" {
+
+			resource.Calculation = &common.HeatmapCalculationOptions{}
+			if err := resource.Calculation.UnmarshalJSONStrict(fields["calculation"]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("calculation", err)...)
+			}
+
+		}
+		delete(fields, "calculation")
+
+	}
+	// Field "color"
+	if fields["color"] != nil {
+		if string(fields["color"]) != "null" {
+
+			resource.Color = HeatmapColorOptions{}
+			if err := resource.Color.UnmarshalJSONStrict(fields["color"]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("color", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("color", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "color")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("color", errors.New("required field is missing from input"))...)
+	}
+	// Field "filterValues"
+	if fields["filterValues"] != nil {
+		if string(fields["filterValues"]) != "null" {
+
+			resource.FilterValues = &FilterValueRange{}
+			if err := resource.FilterValues.UnmarshalJSONStrict(fields["filterValues"]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("filterValues", err)...)
+			}
+
+		}
+		delete(fields, "filterValues")
+
+	}
+	// Field "rowsFrame"
+	if fields["rowsFrame"] != nil {
+		if string(fields["rowsFrame"]) != "null" {
+
+			resource.RowsFrame = &RowsHeatmapOptions{}
+			if err := resource.RowsFrame.UnmarshalJSONStrict(fields["rowsFrame"]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("rowsFrame", err)...)
+			}
+
+		}
+		delete(fields, "rowsFrame")
+
+	}
+	// Field "showValue"
+	if fields["showValue"] != nil {
+		if string(fields["showValue"]) != "null" {
+			if err := json.Unmarshal(fields["showValue"], &resource.ShowValue); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("showValue", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("showValue", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "showValue")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("showValue", errors.New("required field is missing from input"))...)
+	}
+	// Field "cellGap"
+	if fields["cellGap"] != nil {
+		if string(fields["cellGap"]) != "null" {
+			if err := json.Unmarshal(fields["cellGap"], &resource.CellGap); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("cellGap", err)...)
+			}
+
+		}
+		delete(fields, "cellGap")
+
+	}
+	// Field "cellRadius"
+	if fields["cellRadius"] != nil {
+		if string(fields["cellRadius"]) != "null" {
+			if err := json.Unmarshal(fields["cellRadius"], &resource.CellRadius); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("cellRadius", err)...)
+			}
+
+		}
+		delete(fields, "cellRadius")
+
+	}
+	// Field "cellValues"
+	if fields["cellValues"] != nil {
+		if string(fields["cellValues"]) != "null" {
+
+			resource.CellValues = &CellValues{}
+			if err := resource.CellValues.UnmarshalJSONStrict(fields["cellValues"]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("cellValues", err)...)
+			}
+
+		}
+		delete(fields, "cellValues")
+
+	}
+	// Field "yAxis"
+	if fields["yAxis"] != nil {
+		if string(fields["yAxis"]) != "null" {
+
+			resource.YAxis = YAxisConfig{}
+			if err := resource.YAxis.UnmarshalJSONStrict(fields["yAxis"]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("yAxis", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("yAxis", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "yAxis")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("yAxis", errors.New("required field is missing from input"))...)
+	}
+	// Field "legend"
+	if fields["legend"] != nil {
+		if string(fields["legend"]) != "null" {
+
+			resource.Legend = HeatmapLegend{}
+			if err := resource.Legend.UnmarshalJSONStrict(fields["legend"]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("legend", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("legend", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "legend")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("legend", errors.New("required field is missing from input"))...)
+	}
+	// Field "tooltip"
+	if fields["tooltip"] != nil {
+		if string(fields["tooltip"]) != "null" {
+
+			resource.Tooltip = HeatmapTooltip{}
+			if err := resource.Tooltip.UnmarshalJSONStrict(fields["tooltip"]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("tooltip", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("tooltip", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "tooltip")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("tooltip", errors.New("required field is missing from input"))...)
+	}
+	// Field "exemplars"
+	if fields["exemplars"] != nil {
+		if string(fields["exemplars"]) != "null" {
+
+			resource.Exemplars = ExemplarConfig{}
+			if err := resource.Exemplars.UnmarshalJSONStrict(fields["exemplars"]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("exemplars", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("exemplars", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "exemplars")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("exemplars", errors.New("required field is missing from input"))...)
+	}
+	// Field "selectionMode"
+	if fields["selectionMode"] != nil {
+		if string(fields["selectionMode"]) != "null" {
+			if err := json.Unmarshal(fields["selectionMode"], &resource.SelectionMode); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("selectionMode", err)...)
+			}
+
+		}
+		delete(fields, "selectionMode")
+
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("Options", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two `Options` objects.
 func (resource Options) Equals(other Options) bool {
 	if resource.Calculate == nil && other.Calculate != nil || resource.Calculate != nil && other.Calculate == nil {
 		return false
@@ -585,11 +1506,116 @@ func (resource Options) Equals(other Options) bool {
 	return true
 }
 
+// Validate checks all the validation constraints that may be defined on `Options` fields for violations and returns them.
+func (resource Options) Validate() error {
+	var errs cog.BuildErrors
+	if resource.Calculation != nil {
+		if err := resource.Calculation.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("calculation", err)...)
+		}
+	}
+	if err := resource.Color.Validate(); err != nil {
+		errs = append(errs, cog.MakeBuildErrors("color", err)...)
+	}
+	if resource.FilterValues != nil {
+		if err := resource.FilterValues.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("filterValues", err)...)
+		}
+	}
+	if resource.RowsFrame != nil {
+		if err := resource.RowsFrame.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("rowsFrame", err)...)
+		}
+	}
+	if resource.CellGap != nil {
+		if !(*resource.CellGap <= 25) {
+			errs = append(errs, cog.MakeBuildErrors(
+				"cellGap",
+				errors.New("must be <= 25"),
+			)...)
+		}
+	}
+	if resource.CellValues != nil {
+		if err := resource.CellValues.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("cellValues", err)...)
+		}
+	}
+	if err := resource.YAxis.Validate(); err != nil {
+		errs = append(errs, cog.MakeBuildErrors("yAxis", err)...)
+	}
+	if err := resource.Legend.Validate(); err != nil {
+		errs = append(errs, cog.MakeBuildErrors("legend", err)...)
+	}
+	if err := resource.Tooltip.Validate(); err != nil {
+		errs = append(errs, cog.MakeBuildErrors("tooltip", err)...)
+	}
+	if err := resource.Exemplars.Validate(); err != nil {
+		errs = append(errs, cog.MakeBuildErrors("exemplars", err)...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 type FieldConfig struct {
 	ScaleDistribution *common.ScaleDistributionConfig `json:"scaleDistribution,omitempty"`
 	HideFrom          *common.HideSeriesConfig        `json:"hideFrom,omitempty"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `FieldConfig` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *FieldConfig) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "scaleDistribution"
+	if fields["scaleDistribution"] != nil {
+		if string(fields["scaleDistribution"]) != "null" {
+
+			resource.ScaleDistribution = &common.ScaleDistributionConfig{}
+			if err := resource.ScaleDistribution.UnmarshalJSONStrict(fields["scaleDistribution"]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("scaleDistribution", err)...)
+			}
+
+		}
+		delete(fields, "scaleDistribution")
+
+	}
+	// Field "hideFrom"
+	if fields["hideFrom"] != nil {
+		if string(fields["hideFrom"]) != "null" {
+
+			resource.HideFrom = &common.HideSeriesConfig{}
+			if err := resource.HideFrom.UnmarshalJSONStrict(fields["hideFrom"]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("hideFrom", err)...)
+			}
+
+		}
+		delete(fields, "hideFrom")
+
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("FieldConfig", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two `FieldConfig` objects.
 func (resource FieldConfig) Equals(other FieldConfig) bool {
 	if resource.ScaleDistribution == nil && other.ScaleDistribution != nil || resource.ScaleDistribution != nil && other.ScaleDistribution == nil {
 		return false
@@ -613,6 +1639,29 @@ func (resource FieldConfig) Equals(other FieldConfig) bool {
 	return true
 }
 
+// Validate checks all the validation constraints that may be defined on `FieldConfig` fields for violations and returns them.
+func (resource FieldConfig) Validate() error {
+	var errs cog.BuildErrors
+	if resource.ScaleDistribution != nil {
+		if err := resource.ScaleDistribution.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("scaleDistribution", err)...)
+		}
+	}
+	if resource.HideFrom != nil {
+		if err := resource.HideFrom.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("hideFrom", err)...)
+		}
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// VariantConfig returns the configuration related to heatmap panels.
+// This configuration describes how to unmarshal it, convert it to code, …
 func VariantConfig() variants.PanelcfgConfig {
 	return variants.PanelcfgConfig{
 		Identifier: "heatmap",
@@ -620,6 +1669,15 @@ func VariantConfig() variants.PanelcfgConfig {
 			options := &Options{}
 
 			if err := json.Unmarshal(raw, options); err != nil {
+				return nil, err
+			}
+
+			return options, nil
+		},
+		StrictOptionsUnmarshaler: func(raw []byte) (any, error) {
+			options := &Options{}
+
+			if err := options.UnmarshalJSONStrict(raw); err != nil {
 				return nil, err
 			}
 
@@ -633,6 +1691,22 @@ func VariantConfig() variants.PanelcfgConfig {
 			}
 
 			return fieldConfig, nil
+		},
+		StrictFieldConfigUnmarshaler: func(raw []byte) (any, error) {
+			fieldConfig := &FieldConfig{}
+
+			if err := fieldConfig.UnmarshalJSONStrict(raw); err != nil {
+				return nil, err
+			}
+
+			return fieldConfig, nil
+		},
+		GoConverter: func(inputPanel any) string {
+			if panel, ok := inputPanel.(*dashboard.Panel); ok {
+				return PanelConverter(*panel)
+			}
+
+			return PanelConverter(inputPanel.(dashboard.Panel))
 		},
 	}
 }

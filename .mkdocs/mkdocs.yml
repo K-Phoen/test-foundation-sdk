@@ -57,14 +57,14 @@ theme:
       primary: "black"
       scheme: "default"
       toggle:
-        icon: "material/toggle-switch-off-outline"
+        icon: "material/weather-night"
         name: "Switch to dark mode"
-    - accent: "deep-orange"
+    - accent: "deep orange"
       media: "(prefers-color-scheme: dark)"
       primary: "black"
       scheme: "slate"
       toggle:
-        icon: "material/toggle-switch"
+        icon: "material/weather-sunny"
         name: "Switch to light mode"
 
 extra_css:

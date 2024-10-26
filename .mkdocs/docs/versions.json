@@ -1,4 +1,0 @@
-[
-  {"version": "next+cog-v0.0.x", "title": "next", "aliases": []},
-  {"version": "v10.1.x+cog-v0.0.x", "title": "v10.1.x", "aliases": [], "properties": {"deprecated": true}}
-]

@@ -17,11 +17,14 @@ echo "🪧 Building main website"
 rm -rf ${__dir}/site
 mkdocs build -f ${__dir}/mkdocs.yml -d ${__dir}/site
 
-# TODO: build docs/versions.json file somewhere, somehow.
+echo '[]' > "${__dir}/site/versions.json"
 
 find "${__dir}/versions" -maxdepth 1 -mindepth 1 -type d -print | while read -r target; do
     full_version=${target#"${__dir}/versions/"}
+    short_version=$(echo $full_version | cut -d '+' -f1)
     echo "🪧 Building documentation for version ${full_version}"
+
+    cat <<< $(jq ". += [{\"version\": \"${full_version}\", \"title\": \"${short_version}\"}]" "${__dir}/site/versions.json") > "${__dir}/site/versions.json"
 
     SOURCE_VERSION_FOLDER="./versions/${full_version}" mkdocs build -f ${__dir}/mkdocs-version.yml -d ${__dir}/site/${full_version}
 done

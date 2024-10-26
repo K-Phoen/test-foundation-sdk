@@ -26,14 +26,8 @@ func NewTraceqlFilterBuilder() *TraceqlFilterBuilder {
 }
 
 func (builder *TraceqlFilterBuilder) Build() (TraceqlFilter, error) {
-	var errs cog.BuildErrors
-
-	for _, err := range builder.errors {
-		errs = append(errs, cog.MakeBuildErrors("TraceqlFilter", err)...)
-	}
-
-	if len(errs) != 0 {
-		return TraceqlFilter{}, errs
+	if err := builder.internal.Validate(); err != nil {
+		return TraceqlFilter{}, err
 	}
 
 	return *builder.internal, nil

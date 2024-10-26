@@ -4,7 +4,10 @@ package nodegraph
 
 import (
 	"encoding/json"
+	"fmt"
+	"strconv"
 
+	cog "github.com/grafana/grafana-foundation-sdk/go/cog"
 	variants "github.com/grafana/grafana-foundation-sdk/go/cog/variants"
 	dashboard "github.com/grafana/grafana-foundation-sdk/go/dashboard"
 )
@@ -16,6 +19,53 @@ type ArcOption struct {
 	Color *string `json:"color,omitempty"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `ArcOption` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *ArcOption) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "field"
+	if fields["field"] != nil {
+		if string(fields["field"]) != "null" {
+			if err := json.Unmarshal(fields["field"], &resource.Field); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("field", err)...)
+			}
+
+		}
+		delete(fields, "field")
+
+	}
+	// Field "color"
+	if fields["color"] != nil {
+		if string(fields["color"]) != "null" {
+			if err := json.Unmarshal(fields["color"], &resource.Color); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("color", err)...)
+			}
+
+		}
+		delete(fields, "color")
+
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("ArcOption", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two `ArcOption` objects.
 func (resource ArcOption) Equals(other ArcOption) bool {
 	if resource.Field == nil && other.Field != nil || resource.Field != nil && other.Field == nil {
 		return false
@@ -39,6 +89,11 @@ func (resource ArcOption) Equals(other ArcOption) bool {
 	return true
 }
 
+// Validate checks all the validation constraints that may be defined on `ArcOption` fields for violations and returns them.
+func (resource ArcOption) Validate() error {
+	return nil
+}
+
 type NodeOptions struct {
 	// Unit for the main stat to override what ever is set in the data frame.
 	MainStatUnit *string `json:"mainStatUnit,omitempty"`
@@ -48,6 +103,76 @@ type NodeOptions struct {
 	Arcs []ArcOption `json:"arcs,omitempty"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `NodeOptions` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *NodeOptions) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "mainStatUnit"
+	if fields["mainStatUnit"] != nil {
+		if string(fields["mainStatUnit"]) != "null" {
+			if err := json.Unmarshal(fields["mainStatUnit"], &resource.MainStatUnit); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("mainStatUnit", err)...)
+			}
+
+		}
+		delete(fields, "mainStatUnit")
+
+	}
+	// Field "secondaryStatUnit"
+	if fields["secondaryStatUnit"] != nil {
+		if string(fields["secondaryStatUnit"]) != "null" {
+			if err := json.Unmarshal(fields["secondaryStatUnit"], &resource.SecondaryStatUnit); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("secondaryStatUnit", err)...)
+			}
+
+		}
+		delete(fields, "secondaryStatUnit")
+
+	}
+	// Field "arcs"
+	if fields["arcs"] != nil {
+		if string(fields["arcs"]) != "null" {
+
+			partialArray := []json.RawMessage{}
+			if err := json.Unmarshal(fields["arcs"], &partialArray); err != nil {
+				return err
+			}
+
+			for i1 := range partialArray {
+				var result1 ArcOption
+
+				result1 = ArcOption{}
+				if err := result1.UnmarshalJSONStrict(partialArray[i1]); err != nil {
+					errs = append(errs, cog.MakeBuildErrors("arcs["+strconv.Itoa(i1)+"]", err)...)
+				}
+				resource.Arcs = append(resource.Arcs, result1)
+			}
+
+		}
+		delete(fields, "arcs")
+
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("NodeOptions", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two `NodeOptions` objects.
 func (resource NodeOptions) Equals(other NodeOptions) bool {
 	if resource.MainStatUnit == nil && other.MainStatUnit != nil || resource.MainStatUnit != nil && other.MainStatUnit == nil {
 		return false
@@ -81,6 +206,23 @@ func (resource NodeOptions) Equals(other NodeOptions) bool {
 	return true
 }
 
+// Validate checks all the validation constraints that may be defined on `NodeOptions` fields for violations and returns them.
+func (resource NodeOptions) Validate() error {
+	var errs cog.BuildErrors
+
+	for i1 := range resource.Arcs {
+		if err := resource.Arcs[i1].Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("arcs["+strconv.Itoa(i1)+"]", err)...)
+		}
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 type EdgeOptions struct {
 	// Unit for the main stat to override what ever is set in the data frame.
 	MainStatUnit *string `json:"mainStatUnit,omitempty"`
@@ -88,6 +230,53 @@ type EdgeOptions struct {
 	SecondaryStatUnit *string `json:"secondaryStatUnit,omitempty"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `EdgeOptions` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *EdgeOptions) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "mainStatUnit"
+	if fields["mainStatUnit"] != nil {
+		if string(fields["mainStatUnit"]) != "null" {
+			if err := json.Unmarshal(fields["mainStatUnit"], &resource.MainStatUnit); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("mainStatUnit", err)...)
+			}
+
+		}
+		delete(fields, "mainStatUnit")
+
+	}
+	// Field "secondaryStatUnit"
+	if fields["secondaryStatUnit"] != nil {
+		if string(fields["secondaryStatUnit"]) != "null" {
+			if err := json.Unmarshal(fields["secondaryStatUnit"], &resource.SecondaryStatUnit); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("secondaryStatUnit", err)...)
+			}
+
+		}
+		delete(fields, "secondaryStatUnit")
+
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("EdgeOptions", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two `EdgeOptions` objects.
 func (resource EdgeOptions) Equals(other EdgeOptions) bool {
 	if resource.MainStatUnit == nil && other.MainStatUnit != nil || resource.MainStatUnit != nil && other.MainStatUnit == nil {
 		return false
@@ -111,11 +300,67 @@ func (resource EdgeOptions) Equals(other EdgeOptions) bool {
 	return true
 }
 
+// Validate checks all the validation constraints that may be defined on `EdgeOptions` fields for violations and returns them.
+func (resource EdgeOptions) Validate() error {
+	return nil
+}
+
 type Options struct {
 	Nodes *NodeOptions `json:"nodes,omitempty"`
 	Edges *EdgeOptions `json:"edges,omitempty"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `Options` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *Options) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "nodes"
+	if fields["nodes"] != nil {
+		if string(fields["nodes"]) != "null" {
+
+			resource.Nodes = &NodeOptions{}
+			if err := resource.Nodes.UnmarshalJSONStrict(fields["nodes"]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("nodes", err)...)
+			}
+
+		}
+		delete(fields, "nodes")
+
+	}
+	// Field "edges"
+	if fields["edges"] != nil {
+		if string(fields["edges"]) != "null" {
+
+			resource.Edges = &EdgeOptions{}
+			if err := resource.Edges.UnmarshalJSONStrict(fields["edges"]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("edges", err)...)
+			}
+
+		}
+		delete(fields, "edges")
+
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("Options", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two `Options` objects.
 func (resource Options) Equals(other Options) bool {
 	if resource.Nodes == nil && other.Nodes != nil || resource.Nodes != nil && other.Nodes == nil {
 		return false
@@ -139,6 +384,29 @@ func (resource Options) Equals(other Options) bool {
 	return true
 }
 
+// Validate checks all the validation constraints that may be defined on `Options` fields for violations and returns them.
+func (resource Options) Validate() error {
+	var errs cog.BuildErrors
+	if resource.Nodes != nil {
+		if err := resource.Nodes.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("nodes", err)...)
+		}
+	}
+	if resource.Edges != nil {
+		if err := resource.Edges.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("edges", err)...)
+		}
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// VariantConfig returns the configuration related to nodegraph panels.
+// This configuration describes how to unmarshal it, convert it to code, …
 func VariantConfig() variants.PanelcfgConfig {
 	return variants.PanelcfgConfig{
 		Identifier: "nodegraph",
@@ -146,6 +414,15 @@ func VariantConfig() variants.PanelcfgConfig {
 			options := &Options{}
 
 			if err := json.Unmarshal(raw, options); err != nil {
+				return nil, err
+			}
+
+			return options, nil
+		},
+		StrictOptionsUnmarshaler: func(raw []byte) (any, error) {
+			options := &Options{}
+
+			if err := options.UnmarshalJSONStrict(raw); err != nil {
 				return nil, err
 			}
 

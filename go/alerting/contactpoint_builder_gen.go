@@ -3,8 +3,6 @@
 package alerting
 
 import (
-	"errors"
-
 	cog "github.com/grafana/grafana-foundation-sdk/go/cog"
 )
 
@@ -30,14 +28,8 @@ func NewContactPointBuilder() *ContactPointBuilder {
 }
 
 func (builder *ContactPointBuilder) Build() (ContactPoint, error) {
-	var errs cog.BuildErrors
-
-	for _, err := range builder.errors {
-		errs = append(errs, cog.MakeBuildErrors("ContactPoint", err)...)
-	}
-
-	if len(errs) != 0 {
-		return ContactPoint{}, errs
+	if err := builder.internal.Validate(); err != nil {
+		return ContactPoint{}, err
 	}
 
 	return *builder.internal, nil
@@ -86,14 +78,6 @@ func (builder *ContactPointBuilder) Type(typeArg ContactPointType) *ContactPoint
 // EmbeddedContactPoint is the contact point type that is used
 // by grafanas embedded alertmanager implementation.
 func (builder *ContactPointBuilder) Uid(uid string) *ContactPointBuilder {
-	if !(len([]rune(uid)) >= 1) {
-		builder.errors["uid"] = cog.MakeBuildErrors("uid", errors.New("len([]rune(uid)) must be >= 1"))
-		return builder
-	}
-	if !(len([]rune(uid)) <= 40) {
-		builder.errors["uid"] = cog.MakeBuildErrors("uid", errors.New("len([]rune(uid)) must be <= 40"))
-		return builder
-	}
 	builder.internal.Uid = &uid
 
 	return builder

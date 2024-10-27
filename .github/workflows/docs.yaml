@@ -41,6 +41,13 @@ jobs:
           enable-cache: 'true'
           devbox-version: ${{ env.DEVBOX_VERSION }}
 
+      - name: Download minhtml
+        run: |
+          mkdir -p "${HOME}/.local/bin/"
+          wget https://github.com/wilsonzlin/minify-html/releases/download/v0.15.0/minhtml-0.15.0-x86_64-unknown-linux-gnu
+          mv minhtml-0.15.0-x86_64-unknown-linux-gnu "${HOME}/.local/bin/minhtml"
+          run: echo "${HOME}/.local/bin" >> $GITHUB_PATH
+
       - name: Build documentation website
         working-directory: .mkdocs
         run: |

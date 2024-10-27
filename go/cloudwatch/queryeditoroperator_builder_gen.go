@@ -27,14 +27,8 @@ func NewQueryEditorOperatorBuilder() *QueryEditorOperatorBuilder {
 }
 
 func (builder *QueryEditorOperatorBuilder) Build() (QueryEditorOperator, error) {
-	var errs cog.BuildErrors
-
-	for _, err := range builder.errors {
-		errs = append(errs, cog.MakeBuildErrors("QueryEditorOperator", err)...)
-	}
-
-	if len(errs) != 0 {
-		return QueryEditorOperator{}, errs
+	if err := builder.internal.Validate(); err != nil {
+		return QueryEditorOperator{}, err
 	}
 
 	return *builder.internal, nil

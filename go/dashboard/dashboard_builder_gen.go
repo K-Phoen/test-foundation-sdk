@@ -3,8 +3,6 @@
 package dashboard
 
 import (
-	"errors"
-
 	cog "github.com/grafana/grafana-foundation-sdk/go/cog"
 )
 
@@ -35,14 +33,8 @@ func NewDashboardBuilder(title string) *DashboardBuilder {
 }
 
 func (builder *DashboardBuilder) Build() (Dashboard, error) {
-	var errs cog.BuildErrors
-
-	for _, err := range builder.errors {
-		errs = append(errs, cog.MakeBuildErrors("Dashboard", err)...)
-	}
-
-	if len(errs) != 0 {
-		return Dashboard{}, errs
+	if err := builder.internal.Validate(); err != nil {
+		return Dashboard{}, err
 	}
 
 	return *builder.internal, nil
@@ -156,10 +148,6 @@ func (builder *DashboardBuilder) Timepicker(timepicker cog.Builder[TimePickerCon
 
 // The month that the fiscal year starts on.  0 = January, 11 = December
 func (builder *DashboardBuilder) FiscalYearStartMonth(fiscalYearStartMonth uint8) *DashboardBuilder {
-	if !(fiscalYearStartMonth < 12) {
-		builder.errors["fiscalYearStartMonth"] = cog.MakeBuildErrors("fiscalYearStartMonth", errors.New("fiscalYearStartMonth must be < 12"))
-		return builder
-	}
 	builder.internal.FiscalYearStartMonth = &fiscalYearStartMonth
 
 	return builder

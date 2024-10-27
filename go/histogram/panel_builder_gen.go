@@ -3,8 +3,6 @@
 package histogram
 
 import (
-	"errors"
-
 	cog "github.com/grafana/grafana-foundation-sdk/go/cog"
 	variants "github.com/grafana/grafana-foundation-sdk/go/cog/variants"
 	common "github.com/grafana/grafana-foundation-sdk/go/common"
@@ -33,14 +31,8 @@ func NewPanelBuilder() *PanelBuilder {
 }
 
 func (builder *PanelBuilder) Build() (dashboard.Panel, error) {
-	var errs cog.BuildErrors
-
-	for _, err := range builder.errors {
-		errs = append(errs, cog.MakeBuildErrors("Panel", err)...)
-	}
-
-	if len(errs) != 0 {
-		return dashboard.Panel{}, errs
+	if err := builder.internal.Validate(); err != nil {
+		return dashboard.Panel{}, err
 	}
 
 	return *builder.internal, nil
@@ -118,10 +110,6 @@ func (builder *PanelBuilder) GridPos(gridPos dashboard.GridPos) *PanelBuilder {
 
 // Panel height. The height is the number of rows from the top edge of the panel.
 func (builder *PanelBuilder) Height(h uint32) *PanelBuilder {
-	if !(h > 0) {
-		builder.errors["h"] = cog.MakeBuildErrors("h", errors.New("h must be > 0"))
-		return builder
-	}
 	if builder.internal.GridPos == nil {
 		builder.internal.GridPos = &dashboard.GridPos{}
 	}
@@ -132,14 +120,6 @@ func (builder *PanelBuilder) Height(h uint32) *PanelBuilder {
 
 // Panel width. The width is the number of columns from the left edge of the panel.
 func (builder *PanelBuilder) Span(w uint32) *PanelBuilder {
-	if !(w > 0) {
-		builder.errors["w"] = cog.MakeBuildErrors("w", errors.New("w must be > 0"))
-		return builder
-	}
-	if !(w <= 24) {
-		builder.errors["w"] = cog.MakeBuildErrors("w", errors.New("w must be <= 24"))
-		return builder
-	}
 	if builder.internal.GridPos == nil {
 		builder.internal.GridPos = &dashboard.GridPos{}
 	}
@@ -420,10 +400,6 @@ func (builder *PanelBuilder) WithOverride(matcher dashboard.MatcherConfig, prope
 
 // Bucket count (approx)
 func (builder *PanelBuilder) BucketCount(bucketCount int32) *PanelBuilder {
-	if !(bucketCount > 0) {
-		builder.errors["bucketCount"] = cog.MakeBuildErrors("bucketCount", errors.New("bucketCount must be > 0"))
-		return builder
-	}
 	if builder.internal.Options == nil {
 		builder.internal.Options = &Options{}
 	}
@@ -492,10 +468,6 @@ func (builder *PanelBuilder) Combine(combine bool) *PanelBuilder {
 
 // Controls line width of the bars.
 func (builder *PanelBuilder) LineWidth(lineWidth uint32) *PanelBuilder {
-	if !(lineWidth <= 10) {
-		builder.errors["lineWidth"] = cog.MakeBuildErrors("lineWidth", errors.New("lineWidth must be <= 10"))
-		return builder
-	}
 	if builder.internal.FieldConfig == nil {
 		builder.internal.FieldConfig = &dashboard.FieldConfigSource{}
 	}
@@ -509,10 +481,6 @@ func (builder *PanelBuilder) LineWidth(lineWidth uint32) *PanelBuilder {
 
 // Controls the fill opacity of the bars.
 func (builder *PanelBuilder) FillOpacity(fillOpacity uint32) *PanelBuilder {
-	if !(fillOpacity <= 100) {
-		builder.errors["fillOpacity"] = cog.MakeBuildErrors("fillOpacity", errors.New("fillOpacity must be <= 100"))
-		return builder
-	}
 	if builder.internal.FieldConfig == nil {
 		builder.internal.FieldConfig = &dashboard.FieldConfigSource{}
 	}

@@ -4,7 +4,9 @@ package alerting
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
+	"strconv"
 	"time"
 
 	cog "github.com/grafana/grafana-foundation-sdk/go/cog"
@@ -19,6 +21,7 @@ type Query struct {
 	RelativeTimeRange *RelativeTimeRange `json:"relativeTimeRange,omitempty"`
 }
 
+// UnmarshalJSON implements a custom JSON unmarshalling logic to decode Query from JSON.
 func (resource *Query) UnmarshalJSON(raw []byte) error {
 	if raw == nil {
 		return nil
@@ -65,6 +68,92 @@ func (resource *Query) UnmarshalJSON(raw []byte) error {
 	return nil
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `Query` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *Query) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "datasourceUid"
+	if fields["datasourceUid"] != nil {
+		if string(fields["datasourceUid"]) != "null" {
+			if err := json.Unmarshal(fields["datasourceUid"], &resource.DatasourceUid); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("datasourceUid", err)...)
+			}
+
+		}
+		delete(fields, "datasourceUid")
+
+	}
+	// Field "model"
+	if fields["model"] != nil {
+		if string(fields["model"]) != "null" {
+
+			dataquery, err := cog.StrictUnmarshalDataquery(fields["model"], "")
+			if err != nil {
+				errs = append(errs, cog.MakeBuildErrors("model", err)...)
+			} else {
+				resource.Model = dataquery
+			}
+
+		}
+		delete(fields, "model")
+
+	}
+	// Field "queryType"
+	if fields["queryType"] != nil {
+		if string(fields["queryType"]) != "null" {
+			if err := json.Unmarshal(fields["queryType"], &resource.QueryType); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("queryType", err)...)
+			}
+
+		}
+		delete(fields, "queryType")
+
+	}
+	// Field "refId"
+	if fields["refId"] != nil {
+		if string(fields["refId"]) != "null" {
+			if err := json.Unmarshal(fields["refId"], &resource.RefId); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("refId", err)...)
+			}
+
+		}
+		delete(fields, "refId")
+
+	}
+	// Field "relativeTimeRange"
+	if fields["relativeTimeRange"] != nil {
+		if string(fields["relativeTimeRange"]) != "null" {
+
+			resource.RelativeTimeRange = &RelativeTimeRange{}
+			if err := resource.RelativeTimeRange.UnmarshalJSONStrict(fields["relativeTimeRange"]); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("relativeTimeRange", err)...)
+			}
+
+		}
+		delete(fields, "relativeTimeRange")
+
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("Query", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two `Query` objects.
 func (resource Query) Equals(other Query) bool {
 	if resource.DatasourceUid == nil && other.DatasourceUid != nil || resource.DatasourceUid != nil && other.DatasourceUid == nil {
 		return false
@@ -115,6 +204,27 @@ func (resource Query) Equals(other Query) bool {
 	return true
 }
 
+// Validate checks all the validation constraints that may be defined on `Query` fields for violations and returns them.
+func (resource Query) Validate() error {
+	var errs cog.BuildErrors
+	if resource.Model != nil {
+		if err := resource.Model.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("model", err)...)
+		}
+	}
+	if resource.RelativeTimeRange != nil {
+		if err := resource.RelativeTimeRange.Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("relativeTimeRange", err)...)
+		}
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 type RuleGroup struct {
 	FolderUid *string `json:"folderUid,omitempty"`
 	// The interval, in seconds, at which all rules in the group are evaluated.
@@ -124,6 +234,87 @@ type RuleGroup struct {
 	Title    *string   `json:"title,omitempty"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `RuleGroup` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *RuleGroup) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "folderUid"
+	if fields["folderUid"] != nil {
+		if string(fields["folderUid"]) != "null" {
+			if err := json.Unmarshal(fields["folderUid"], &resource.FolderUid); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("folderUid", err)...)
+			}
+
+		}
+		delete(fields, "folderUid")
+
+	}
+	// Field "interval"
+	if fields["interval"] != nil {
+		if string(fields["interval"]) != "null" {
+			if err := json.Unmarshal(fields["interval"], &resource.Interval); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("interval", err)...)
+			}
+
+		}
+		delete(fields, "interval")
+
+	}
+	// Field "rules"
+	if fields["rules"] != nil {
+		if string(fields["rules"]) != "null" {
+
+			partialArray := []json.RawMessage{}
+			if err := json.Unmarshal(fields["rules"], &partialArray); err != nil {
+				return err
+			}
+
+			for i1 := range partialArray {
+				var result1 Rule
+
+				result1 = Rule{}
+				if err := result1.UnmarshalJSONStrict(partialArray[i1]); err != nil {
+					errs = append(errs, cog.MakeBuildErrors("rules["+strconv.Itoa(i1)+"]", err)...)
+				}
+				resource.Rules = append(resource.Rules, result1)
+			}
+
+		}
+		delete(fields, "rules")
+
+	}
+	// Field "title"
+	if fields["title"] != nil {
+		if string(fields["title"]) != "null" {
+			if err := json.Unmarshal(fields["title"], &resource.Title); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("title", err)...)
+			}
+
+		}
+		delete(fields, "title")
+
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("RuleGroup", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two `RuleGroup` objects.
 func (resource RuleGroup) Equals(other RuleGroup) bool {
 	if resource.FolderUid == nil && other.FolderUid != nil || resource.FolderUid != nil && other.FolderUid == nil {
 		return false
@@ -166,6 +357,23 @@ func (resource RuleGroup) Equals(other RuleGroup) bool {
 	return true
 }
 
+// Validate checks all the validation constraints that may be defined on `RuleGroup` fields for violations and returns them.
+func (resource RuleGroup) Validate() error {
+	var errs cog.BuildErrors
+
+	for i1 := range resource.Rules {
+		if err := resource.Rules[i1].Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("rules["+strconv.Itoa(i1)+"]", err)...)
+		}
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 // Duration in seconds.
 type Duration int64
 
@@ -192,6 +400,103 @@ type ContactPoint struct {
 	Uid *string `json:"uid,omitempty"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `ContactPoint` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *ContactPoint) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "disableResolveMessage"
+	if fields["disableResolveMessage"] != nil {
+		if string(fields["disableResolveMessage"]) != "null" {
+			if err := json.Unmarshal(fields["disableResolveMessage"], &resource.DisableResolveMessage); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("disableResolveMessage", err)...)
+			}
+
+		}
+		delete(fields, "disableResolveMessage")
+
+	}
+	// Field "name"
+	if fields["name"] != nil {
+		if string(fields["name"]) != "null" {
+			if err := json.Unmarshal(fields["name"], &resource.Name); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("name", err)...)
+			}
+
+		}
+		delete(fields, "name")
+
+	}
+	// Field "provenance"
+	if fields["provenance"] != nil {
+		if string(fields["provenance"]) != "null" {
+			if err := json.Unmarshal(fields["provenance"], &resource.Provenance); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("provenance", err)...)
+			}
+
+		}
+		delete(fields, "provenance")
+
+	}
+	// Field "settings"
+	if fields["settings"] != nil {
+		if string(fields["settings"]) != "null" {
+			if err := json.Unmarshal(fields["settings"], &resource.Settings); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("settings", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("settings", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "settings")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("settings", errors.New("required field is missing from input"))...)
+	}
+	// Field "type"
+	if fields["type"] != nil {
+		if string(fields["type"]) != "null" {
+			if err := json.Unmarshal(fields["type"], &resource.Type); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("type", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("type", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "type")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("type", errors.New("required field is missing from input"))...)
+	}
+	// Field "uid"
+	if fields["uid"] != nil {
+		if string(fields["uid"]) != "null" {
+			if err := json.Unmarshal(fields["uid"], &resource.Uid); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("uid", err)...)
+			}
+
+		}
+		delete(fields, "uid")
+
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("ContactPoint", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two `ContactPoint` objects.
 func (resource ContactPoint) Equals(other ContactPoint) bool {
 	if resource.DisableResolveMessage == nil && other.DisableResolveMessage != nil || resource.DisableResolveMessage != nil && other.DisableResolveMessage == nil {
 		return false
@@ -239,6 +544,31 @@ func (resource ContactPoint) Equals(other ContactPoint) bool {
 	return true
 }
 
+// Validate checks all the validation constraints that may be defined on `ContactPoint` fields for violations and returns them.
+func (resource ContactPoint) Validate() error {
+	var errs cog.BuildErrors
+	if resource.Uid != nil {
+		if !(len([]rune(*resource.Uid)) >= 0x1) {
+			errs = append(errs, cog.MakeBuildErrors(
+				"uid",
+				errors.New("must be >= 1"),
+			)...)
+		}
+		if !(len([]rune(*resource.Uid)) <= 0x28) {
+			errs = append(errs, cog.MakeBuildErrors(
+				"uid",
+				errors.New("must be <= 40"),
+			)...)
+		}
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 type Json any
 
 type MatchRegexps map[string]string
@@ -258,6 +588,64 @@ type Matcher struct {
 	Value *string    `json:"Value,omitempty"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `Matcher` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *Matcher) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "Name"
+	if fields["Name"] != nil {
+		if string(fields["Name"]) != "null" {
+			if err := json.Unmarshal(fields["Name"], &resource.Name); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("Name", err)...)
+			}
+
+		}
+		delete(fields, "Name")
+
+	}
+	// Field "Type"
+	if fields["Type"] != nil {
+		if string(fields["Type"]) != "null" {
+			if err := json.Unmarshal(fields["Type"], &resource.Type); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("Type", err)...)
+			}
+
+		}
+		delete(fields, "Type")
+
+	}
+	// Field "Value"
+	if fields["Value"] != nil {
+		if string(fields["Value"]) != "null" {
+			if err := json.Unmarshal(fields["Value"], &resource.Value); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("Value", err)...)
+			}
+
+		}
+		delete(fields, "Value")
+
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("Matcher", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two `Matcher` objects.
 func (resource Matcher) Equals(other Matcher) bool {
 	if resource.Name == nil && other.Name != nil || resource.Name != nil && other.Name == nil {
 		return false
@@ -290,6 +678,11 @@ func (resource Matcher) Equals(other Matcher) bool {
 	return true
 }
 
+// Validate checks all the validation constraints that may be defined on `Matcher` fields for violations and returns them.
+func (resource Matcher) Validate() error {
+	return nil
+}
+
 // Matchers is a slice of Matchers that is sortable, implements Stringer, and
 // provides a Matches method to match a LabelSet against all Matchers in the
 // slice. Note that some users of Matchers might require it to be sorted.
@@ -300,6 +693,65 @@ type MuteTiming struct {
 	TimeIntervals []TimeInterval `json:"time_intervals,omitempty"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `MuteTiming` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *MuteTiming) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "name"
+	if fields["name"] != nil {
+		if string(fields["name"]) != "null" {
+			if err := json.Unmarshal(fields["name"], &resource.Name); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("name", err)...)
+			}
+
+		}
+		delete(fields, "name")
+
+	}
+	// Field "time_intervals"
+	if fields["time_intervals"] != nil {
+		if string(fields["time_intervals"]) != "null" {
+
+			partialArray := []json.RawMessage{}
+			if err := json.Unmarshal(fields["time_intervals"], &partialArray); err != nil {
+				return err
+			}
+
+			for i1 := range partialArray {
+				var result1 TimeInterval
+
+				result1 = TimeInterval{}
+				if err := result1.UnmarshalJSONStrict(partialArray[i1]); err != nil {
+					errs = append(errs, cog.MakeBuildErrors("time_intervals["+strconv.Itoa(i1)+"]", err)...)
+				}
+				resource.TimeIntervals = append(resource.TimeIntervals, result1)
+			}
+
+		}
+		delete(fields, "time_intervals")
+
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("MuteTiming", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two `MuteTiming` objects.
 func (resource MuteTiming) Equals(other MuteTiming) bool {
 	if resource.Name == nil && other.Name != nil || resource.Name != nil && other.Name == nil {
 		return false
@@ -324,12 +776,87 @@ func (resource MuteTiming) Equals(other MuteTiming) bool {
 	return true
 }
 
+// Validate checks all the validation constraints that may be defined on `MuteTiming` fields for violations and returns them.
+func (resource MuteTiming) Validate() error {
+	var errs cog.BuildErrors
+
+	for i1 := range resource.TimeIntervals {
+		if err := resource.TimeIntervals[i1].Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("time_intervals["+strconv.Itoa(i1)+"]", err)...)
+		}
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 type NotificationTemplate struct {
 	Name       *string     `json:"name,omitempty"`
 	Provenance *Provenance `json:"provenance,omitempty"`
 	Template   *string     `json:"template,omitempty"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `NotificationTemplate` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *NotificationTemplate) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "name"
+	if fields["name"] != nil {
+		if string(fields["name"]) != "null" {
+			if err := json.Unmarshal(fields["name"], &resource.Name); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("name", err)...)
+			}
+
+		}
+		delete(fields, "name")
+
+	}
+	// Field "provenance"
+	if fields["provenance"] != nil {
+		if string(fields["provenance"]) != "null" {
+			if err := json.Unmarshal(fields["provenance"], &resource.Provenance); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("provenance", err)...)
+			}
+
+		}
+		delete(fields, "provenance")
+
+	}
+	// Field "template"
+	if fields["template"] != nil {
+		if string(fields["template"]) != "null" {
+			if err := json.Unmarshal(fields["template"], &resource.Template); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("template", err)...)
+			}
+
+		}
+		delete(fields, "template")
+
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("NotificationTemplate", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two `NotificationTemplate` objects.
 func (resource NotificationTemplate) Equals(other NotificationTemplate) bool {
 	if resource.Name == nil && other.Name != nil || resource.Name != nil && other.Name == nil {
 		return false
@@ -362,6 +889,11 @@ func (resource NotificationTemplate) Equals(other NotificationTemplate) bool {
 	return true
 }
 
+// Validate checks all the validation constraints that may be defined on `NotificationTemplate` fields for violations and returns them.
+func (resource NotificationTemplate) Validate() error {
+	return nil
+}
+
 type ObjectMatcher []string
 
 type ObjectMatchers []ObjectMatcher
@@ -389,6 +921,248 @@ type Rule struct {
 	Updated     *time.Time        `json:"updated,omitempty"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `Rule` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *Rule) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "annotations"
+	if fields["annotations"] != nil {
+		if string(fields["annotations"]) != "null" {
+
+			if err := json.Unmarshal(fields["annotations"], &resource.Annotations); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("annotations", err)...)
+			}
+
+		}
+		delete(fields, "annotations")
+
+	}
+	// Field "condition"
+	if fields["condition"] != nil {
+		if string(fields["condition"]) != "null" {
+			if err := json.Unmarshal(fields["condition"], &resource.Condition); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("condition", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("condition", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "condition")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("condition", errors.New("required field is missing from input"))...)
+	}
+	// Field "data"
+	if fields["data"] != nil {
+		if string(fields["data"]) != "null" {
+
+			partialArray := []json.RawMessage{}
+			if err := json.Unmarshal(fields["data"], &partialArray); err != nil {
+				return err
+			}
+
+			for i1 := range partialArray {
+				var result1 Query
+
+				result1 = Query{}
+				if err := result1.UnmarshalJSONStrict(partialArray[i1]); err != nil {
+					errs = append(errs, cog.MakeBuildErrors("data["+strconv.Itoa(i1)+"]", err)...)
+				}
+				resource.Data = append(resource.Data, result1)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("data", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "data")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("data", errors.New("required field is missing from input"))...)
+	}
+	// Field "execErrState"
+	if fields["execErrState"] != nil {
+		if string(fields["execErrState"]) != "null" {
+			if err := json.Unmarshal(fields["execErrState"], &resource.ExecErrState); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("execErrState", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("execErrState", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "execErrState")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("execErrState", errors.New("required field is missing from input"))...)
+	}
+	// Field "folderUID"
+	if fields["folderUID"] != nil {
+		if string(fields["folderUID"]) != "null" {
+			if err := json.Unmarshal(fields["folderUID"], &resource.FolderUID); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("folderUID", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("folderUID", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "folderUID")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("folderUID", errors.New("required field is missing from input"))...)
+	}
+	// Field "for"
+	if fields["for"] != nil {
+		if string(fields["for"]) != "null" {
+			if err := json.Unmarshal(fields["for"], &resource.For); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("for", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("for", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "for")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("for", errors.New("required field is missing from input"))...)
+	}
+	// Field "id"
+	if fields["id"] != nil {
+		if string(fields["id"]) != "null" {
+			if err := json.Unmarshal(fields["id"], &resource.Id); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("id", err)...)
+			}
+
+		}
+		delete(fields, "id")
+
+	}
+	// Field "isPaused"
+	if fields["isPaused"] != nil {
+		if string(fields["isPaused"]) != "null" {
+			if err := json.Unmarshal(fields["isPaused"], &resource.IsPaused); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("isPaused", err)...)
+			}
+
+		}
+		delete(fields, "isPaused")
+
+	}
+	// Field "labels"
+	if fields["labels"] != nil {
+		if string(fields["labels"]) != "null" {
+
+			if err := json.Unmarshal(fields["labels"], &resource.Labels); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("labels", err)...)
+			}
+
+		}
+		delete(fields, "labels")
+
+	}
+	// Field "noDataState"
+	if fields["noDataState"] != nil {
+		if string(fields["noDataState"]) != "null" {
+			if err := json.Unmarshal(fields["noDataState"], &resource.NoDataState); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("noDataState", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("noDataState", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "noDataState")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("noDataState", errors.New("required field is missing from input"))...)
+	}
+	// Field "orgID"
+	if fields["orgID"] != nil {
+		if string(fields["orgID"]) != "null" {
+			if err := json.Unmarshal(fields["orgID"], &resource.OrgID); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("orgID", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("orgID", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "orgID")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("orgID", errors.New("required field is missing from input"))...)
+	}
+	// Field "provenance"
+	if fields["provenance"] != nil {
+		if string(fields["provenance"]) != "null" {
+			if err := json.Unmarshal(fields["provenance"], &resource.Provenance); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("provenance", err)...)
+			}
+
+		}
+		delete(fields, "provenance")
+
+	}
+	// Field "ruleGroup"
+	if fields["ruleGroup"] != nil {
+		if string(fields["ruleGroup"]) != "null" {
+			if err := json.Unmarshal(fields["ruleGroup"], &resource.RuleGroup); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("ruleGroup", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("ruleGroup", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "ruleGroup")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("ruleGroup", errors.New("required field is missing from input"))...)
+	}
+	// Field "title"
+	if fields["title"] != nil {
+		if string(fields["title"]) != "null" {
+			if err := json.Unmarshal(fields["title"], &resource.Title); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("title", err)...)
+			}
+		} else {
+			errs = append(errs, cog.MakeBuildErrors("title", errors.New("required field is null"))...)
+
+		}
+		delete(fields, "title")
+	} else {
+		errs = append(errs, cog.MakeBuildErrors("title", errors.New("required field is missing from input"))...)
+	}
+	// Field "uid"
+	if fields["uid"] != nil {
+		if string(fields["uid"]) != "null" {
+			if err := json.Unmarshal(fields["uid"], &resource.Uid); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("uid", err)...)
+			}
+
+		}
+		delete(fields, "uid")
+
+	}
+	// Field "updated"
+	if fields["updated"] != nil {
+		if string(fields["updated"]) != "null" {
+			if err := json.Unmarshal(fields["updated"], &resource.Updated); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("updated", err)...)
+			}
+
+		}
+		delete(fields, "updated")
+
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("Rule", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two `Rule` objects.
 func (resource Rule) Equals(other Rule) bool {
 
 	if len(resource.Annotations) != len(other.Annotations) {
@@ -493,6 +1267,61 @@ func (resource Rule) Equals(other Rule) bool {
 	return true
 }
 
+// Validate checks all the validation constraints that may be defined on `Rule` fields for violations and returns them.
+func (resource Rule) Validate() error {
+	var errs cog.BuildErrors
+
+	for i1 := range resource.Data {
+		if err := resource.Data[i1].Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("data["+strconv.Itoa(i1)+"]", err)...)
+		}
+	}
+	if !(len([]rune(resource.RuleGroup)) >= 0x1) {
+		errs = append(errs, cog.MakeBuildErrors(
+			"ruleGroup",
+			errors.New("must be >= 1"),
+		)...)
+	}
+	if !(len([]rune(resource.RuleGroup)) <= 0xbe) {
+		errs = append(errs, cog.MakeBuildErrors(
+			"ruleGroup",
+			errors.New("must be <= 190"),
+		)...)
+	}
+	if !(len([]rune(resource.Title)) >= 0x1) {
+		errs = append(errs, cog.MakeBuildErrors(
+			"title",
+			errors.New("must be >= 1"),
+		)...)
+	}
+	if !(len([]rune(resource.Title)) <= 0xbe) {
+		errs = append(errs, cog.MakeBuildErrors(
+			"title",
+			errors.New("must be <= 190"),
+		)...)
+	}
+	if resource.Uid != nil {
+		if !(len([]rune(*resource.Uid)) >= 0x1) {
+			errs = append(errs, cog.MakeBuildErrors(
+				"uid",
+				errors.New("must be >= 1"),
+			)...)
+		}
+		if !(len([]rune(*resource.Uid)) <= 0x28) {
+			errs = append(errs, cog.MakeBuildErrors(
+				"uid",
+				errors.New("must be <= 40"),
+			)...)
+		}
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 // RelativeTimeRange is the per query start and end time
 // for requests.
 type RelativeTimeRange struct {
@@ -504,6 +1333,53 @@ type RelativeTimeRange struct {
 	To *Duration `json:"to,omitempty"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `RelativeTimeRange` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *RelativeTimeRange) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "from"
+	if fields["from"] != nil {
+		if string(fields["from"]) != "null" {
+			if err := json.Unmarshal(fields["from"], &resource.From); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("from", err)...)
+			}
+
+		}
+		delete(fields, "from")
+
+	}
+	// Field "to"
+	if fields["to"] != nil {
+		if string(fields["to"]) != "null" {
+			if err := json.Unmarshal(fields["to"], &resource.To); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("to", err)...)
+			}
+
+		}
+		delete(fields, "to")
+
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("RelativeTimeRange", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two `RelativeTimeRange` objects.
 func (resource RelativeTimeRange) Equals(other RelativeTimeRange) bool {
 	if resource.From == nil && other.From != nil || resource.From != nil && other.From == nil {
 		return false
@@ -525,6 +1401,11 @@ func (resource RelativeTimeRange) Equals(other RelativeTimeRange) bool {
 	}
 
 	return true
+}
+
+// Validate checks all the validation constraints that may be defined on `RelativeTimeRange` fields for violations and returns them.
+func (resource RelativeTimeRange) Validate() error {
+	return nil
 }
 
 // A Route is a node that contains definitions of how to handle alerts. This is modified
@@ -571,6 +1452,203 @@ type NotificationPolicy struct {
 	Routes []NotificationPolicy `json:"routes,omitempty"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `NotificationPolicy` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *NotificationPolicy) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "continue"
+	if fields["continue"] != nil {
+		if string(fields["continue"]) != "null" {
+			if err := json.Unmarshal(fields["continue"], &resource.Continue); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("continue", err)...)
+			}
+
+		}
+		delete(fields, "continue")
+
+	}
+	// Field "group_by"
+	if fields["group_by"] != nil {
+		if string(fields["group_by"]) != "null" {
+
+			if err := json.Unmarshal(fields["group_by"], &resource.GroupBy); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("group_by", err)...)
+			}
+
+		}
+		delete(fields, "group_by")
+
+	}
+	// Field "group_interval"
+	if fields["group_interval"] != nil {
+		if string(fields["group_interval"]) != "null" {
+			if err := json.Unmarshal(fields["group_interval"], &resource.GroupInterval); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("group_interval", err)...)
+			}
+
+		}
+		delete(fields, "group_interval")
+
+	}
+	// Field "group_wait"
+	if fields["group_wait"] != nil {
+		if string(fields["group_wait"]) != "null" {
+			if err := json.Unmarshal(fields["group_wait"], &resource.GroupWait); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("group_wait", err)...)
+			}
+
+		}
+		delete(fields, "group_wait")
+
+	}
+	// Field "match"
+	if fields["match"] != nil {
+		if string(fields["match"]) != "null" {
+
+			if err := json.Unmarshal(fields["match"], &resource.Match); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("match", err)...)
+			}
+
+		}
+		delete(fields, "match")
+
+	}
+	// Field "match_re"
+	if fields["match_re"] != nil {
+		if string(fields["match_re"]) != "null" {
+
+			if err := json.Unmarshal(fields["match_re"], &resource.MatchRe); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("match_re", err)...)
+			}
+
+		}
+		delete(fields, "match_re")
+
+	}
+	// Field "matchers"
+	if fields["matchers"] != nil {
+		if string(fields["matchers"]) != "null" {
+
+			partialArray := []json.RawMessage{}
+			if err := json.Unmarshal(fields["matchers"], &partialArray); err != nil {
+				return err
+			}
+
+			for i1 := range partialArray {
+				var result1 Matcher
+
+				result1 = Matcher{}
+				if err := result1.UnmarshalJSONStrict(partialArray[i1]); err != nil {
+					errs = append(errs, cog.MakeBuildErrors("matchers["+strconv.Itoa(i1)+"]", err)...)
+				}
+				resource.Matchers = cog.ToPtr(append(*resource.Matchers, result1))
+			}
+
+		}
+		delete(fields, "matchers")
+
+	}
+	// Field "mute_time_intervals"
+	if fields["mute_time_intervals"] != nil {
+		if string(fields["mute_time_intervals"]) != "null" {
+
+			if err := json.Unmarshal(fields["mute_time_intervals"], &resource.MuteTimeIntervals); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("mute_time_intervals", err)...)
+			}
+
+		}
+		delete(fields, "mute_time_intervals")
+
+	}
+	// Field "object_matchers"
+	if fields["object_matchers"] != nil {
+		if string(fields["object_matchers"]) != "null" {
+
+			if err := json.Unmarshal(fields["object_matchers"], &resource.ObjectMatchers); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("object_matchers", err)...)
+			}
+
+		}
+		delete(fields, "object_matchers")
+
+	}
+	// Field "provenance"
+	if fields["provenance"] != nil {
+		if string(fields["provenance"]) != "null" {
+			if err := json.Unmarshal(fields["provenance"], &resource.Provenance); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("provenance", err)...)
+			}
+
+		}
+		delete(fields, "provenance")
+
+	}
+	// Field "receiver"
+	if fields["receiver"] != nil {
+		if string(fields["receiver"]) != "null" {
+			if err := json.Unmarshal(fields["receiver"], &resource.Receiver); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("receiver", err)...)
+			}
+
+		}
+		delete(fields, "receiver")
+
+	}
+	// Field "repeat_interval"
+	if fields["repeat_interval"] != nil {
+		if string(fields["repeat_interval"]) != "null" {
+			if err := json.Unmarshal(fields["repeat_interval"], &resource.RepeatInterval); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("repeat_interval", err)...)
+			}
+
+		}
+		delete(fields, "repeat_interval")
+
+	}
+	// Field "routes"
+	if fields["routes"] != nil {
+		if string(fields["routes"]) != "null" {
+
+			partialArray := []json.RawMessage{}
+			if err := json.Unmarshal(fields["routes"], &partialArray); err != nil {
+				return err
+			}
+
+			for i1 := range partialArray {
+				var result1 NotificationPolicy
+
+				result1 = NotificationPolicy{}
+				if err := result1.UnmarshalJSONStrict(partialArray[i1]); err != nil {
+					errs = append(errs, cog.MakeBuildErrors("routes["+strconv.Itoa(i1)+"]", err)...)
+				}
+				resource.Routes = append(resource.Routes, result1)
+			}
+
+		}
+		delete(fields, "routes")
+
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("NotificationPolicy", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two `NotificationPolicy` objects.
 func (resource NotificationPolicy) Equals(other NotificationPolicy) bool {
 	if resource.Continue == nil && other.Continue != nil || resource.Continue != nil && other.Continue == nil {
 		return false
@@ -725,6 +1803,23 @@ func (resource NotificationPolicy) Equals(other NotificationPolicy) bool {
 	return true
 }
 
+// Validate checks all the validation constraints that may be defined on `NotificationPolicy` fields for violations and returns them.
+func (resource NotificationPolicy) Validate() error {
+	var errs cog.BuildErrors
+
+	for i1 := range resource.Routes {
+		if err := resource.Routes[i1].Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("routes["+strconv.Itoa(i1)+"]", err)...)
+		}
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 // TimeInterval describes intervals of time. ContainsTime will tell you if a golang time is contained
 // within the interval.
 type TimeInterval struct {
@@ -748,6 +1843,113 @@ type TimeInterval struct {
 	Years []string `json:"years,omitempty"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `TimeInterval` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *TimeInterval) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "days_of_month"
+	if fields["days_of_month"] != nil {
+		if string(fields["days_of_month"]) != "null" {
+
+			if err := json.Unmarshal(fields["days_of_month"], &resource.DaysOfMonth); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("days_of_month", err)...)
+			}
+
+		}
+		delete(fields, "days_of_month")
+
+	}
+	// Field "location"
+	if fields["location"] != nil {
+		if string(fields["location"]) != "null" {
+			if err := json.Unmarshal(fields["location"], &resource.Location); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("location", err)...)
+			}
+
+		}
+		delete(fields, "location")
+
+	}
+	// Field "months"
+	if fields["months"] != nil {
+		if string(fields["months"]) != "null" {
+
+			if err := json.Unmarshal(fields["months"], &resource.Months); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("months", err)...)
+			}
+
+		}
+		delete(fields, "months")
+
+	}
+	// Field "times"
+	if fields["times"] != nil {
+		if string(fields["times"]) != "null" {
+
+			partialArray := []json.RawMessage{}
+			if err := json.Unmarshal(fields["times"], &partialArray); err != nil {
+				return err
+			}
+
+			for i1 := range partialArray {
+				var result1 TimeRange
+
+				result1 = TimeRange{}
+				if err := result1.UnmarshalJSONStrict(partialArray[i1]); err != nil {
+					errs = append(errs, cog.MakeBuildErrors("times["+strconv.Itoa(i1)+"]", err)...)
+				}
+				resource.Times = append(resource.Times, result1)
+			}
+
+		}
+		delete(fields, "times")
+
+	}
+	// Field "weekdays"
+	if fields["weekdays"] != nil {
+		if string(fields["weekdays"]) != "null" {
+
+			if err := json.Unmarshal(fields["weekdays"], &resource.Weekdays); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("weekdays", err)...)
+			}
+
+		}
+		delete(fields, "weekdays")
+
+	}
+	// Field "years"
+	if fields["years"] != nil {
+		if string(fields["years"]) != "null" {
+
+			if err := json.Unmarshal(fields["years"], &resource.Years); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("years", err)...)
+			}
+
+		}
+		delete(fields, "years")
+
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("TimeInterval", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two `TimeInterval` objects.
 func (resource TimeInterval) Equals(other TimeInterval) bool {
 
 	if len(resource.DaysOfMonth) != len(other.DaysOfMonth) {
@@ -812,6 +2014,23 @@ func (resource TimeInterval) Equals(other TimeInterval) bool {
 	return true
 }
 
+// Validate checks all the validation constraints that may be defined on `TimeInterval` fields for violations and returns them.
+func (resource TimeInterval) Validate() error {
+	var errs cog.BuildErrors
+
+	for i1 := range resource.Times {
+		if err := resource.Times[i1].Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("times["+strconv.Itoa(i1)+"]", err)...)
+		}
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 type TimeIntervalItem struct {
 	DaysOfMonth []string                `json:"days_of_month,omitempty"`
 	Location    *string                 `json:"location,omitempty"`
@@ -821,6 +2040,113 @@ type TimeIntervalItem struct {
 	Years       []string                `json:"years,omitempty"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `TimeIntervalItem` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *TimeIntervalItem) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "days_of_month"
+	if fields["days_of_month"] != nil {
+		if string(fields["days_of_month"]) != "null" {
+
+			if err := json.Unmarshal(fields["days_of_month"], &resource.DaysOfMonth); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("days_of_month", err)...)
+			}
+
+		}
+		delete(fields, "days_of_month")
+
+	}
+	// Field "location"
+	if fields["location"] != nil {
+		if string(fields["location"]) != "null" {
+			if err := json.Unmarshal(fields["location"], &resource.Location); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("location", err)...)
+			}
+
+		}
+		delete(fields, "location")
+
+	}
+	// Field "months"
+	if fields["months"] != nil {
+		if string(fields["months"]) != "null" {
+
+			if err := json.Unmarshal(fields["months"], &resource.Months); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("months", err)...)
+			}
+
+		}
+		delete(fields, "months")
+
+	}
+	// Field "times"
+	if fields["times"] != nil {
+		if string(fields["times"]) != "null" {
+
+			partialArray := []json.RawMessage{}
+			if err := json.Unmarshal(fields["times"], &partialArray); err != nil {
+				return err
+			}
+
+			for i1 := range partialArray {
+				var result1 TimeIntervalTimeRange
+
+				result1 = TimeIntervalTimeRange{}
+				if err := result1.UnmarshalJSONStrict(partialArray[i1]); err != nil {
+					errs = append(errs, cog.MakeBuildErrors("times["+strconv.Itoa(i1)+"]", err)...)
+				}
+				resource.Times = append(resource.Times, result1)
+			}
+
+		}
+		delete(fields, "times")
+
+	}
+	// Field "weekdays"
+	if fields["weekdays"] != nil {
+		if string(fields["weekdays"]) != "null" {
+
+			if err := json.Unmarshal(fields["weekdays"], &resource.Weekdays); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("weekdays", err)...)
+			}
+
+		}
+		delete(fields, "weekdays")
+
+	}
+	// Field "years"
+	if fields["years"] != nil {
+		if string(fields["years"]) != "null" {
+
+			if err := json.Unmarshal(fields["years"], &resource.Years); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("years", err)...)
+			}
+
+		}
+		delete(fields, "years")
+
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("TimeIntervalItem", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two `TimeIntervalItem` objects.
 func (resource TimeIntervalItem) Equals(other TimeIntervalItem) bool {
 
 	if len(resource.DaysOfMonth) != len(other.DaysOfMonth) {
@@ -885,11 +2211,75 @@ func (resource TimeIntervalItem) Equals(other TimeIntervalItem) bool {
 	return true
 }
 
+// Validate checks all the validation constraints that may be defined on `TimeIntervalItem` fields for violations and returns them.
+func (resource TimeIntervalItem) Validate() error {
+	var errs cog.BuildErrors
+
+	for i1 := range resource.Times {
+		if err := resource.Times[i1].Validate(); err != nil {
+			errs = append(errs, cog.MakeBuildErrors("times["+strconv.Itoa(i1)+"]", err)...)
+		}
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
 type TimeIntervalTimeRange struct {
 	EndTime   *string `json:"end_time,omitempty"`
 	StartTime *string `json:"start_time,omitempty"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `TimeIntervalTimeRange` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *TimeIntervalTimeRange) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "end_time"
+	if fields["end_time"] != nil {
+		if string(fields["end_time"]) != "null" {
+			if err := json.Unmarshal(fields["end_time"], &resource.EndTime); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("end_time", err)...)
+			}
+
+		}
+		delete(fields, "end_time")
+
+	}
+	// Field "start_time"
+	if fields["start_time"] != nil {
+		if string(fields["start_time"]) != "null" {
+			if err := json.Unmarshal(fields["start_time"], &resource.StartTime); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("start_time", err)...)
+			}
+
+		}
+		delete(fields, "start_time")
+
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("TimeIntervalTimeRange", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two `TimeIntervalTimeRange` objects.
 func (resource TimeIntervalTimeRange) Equals(other TimeIntervalTimeRange) bool {
 	if resource.EndTime == nil && other.EndTime != nil || resource.EndTime != nil && other.EndTime == nil {
 		return false
@@ -913,6 +2303,11 @@ func (resource TimeIntervalTimeRange) Equals(other TimeIntervalTimeRange) bool {
 	return true
 }
 
+// Validate checks all the validation constraints that may be defined on `TimeIntervalTimeRange` fields for violations and returns them.
+func (resource TimeIntervalTimeRange) Validate() error {
+	return nil
+}
+
 // Redefining this to avoid an import cycle
 type TimeRange struct {
 	// Redefining this to avoid an import cycle
@@ -921,6 +2316,53 @@ type TimeRange struct {
 	To *time.Time `json:"to,omitempty"`
 }
 
+// UnmarshalJSONStrict implements a custom JSON unmarshalling logic to decode `TimeRange` from JSON.
+// Note: the unmarshalling done by this function is strict. It will fail over required fields being absent from the input, fields having an incorrect type, unexpected fields being present, …
+func (resource *TimeRange) UnmarshalJSONStrict(raw []byte) error {
+	if raw == nil {
+		return nil
+	}
+	var errs cog.BuildErrors
+
+	fields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(raw, &fields); err != nil {
+		return err
+	}
+	// Field "from"
+	if fields["from"] != nil {
+		if string(fields["from"]) != "null" {
+			if err := json.Unmarshal(fields["from"], &resource.From); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("from", err)...)
+			}
+
+		}
+		delete(fields, "from")
+
+	}
+	// Field "to"
+	if fields["to"] != nil {
+		if string(fields["to"]) != "null" {
+			if err := json.Unmarshal(fields["to"], &resource.To); err != nil {
+				errs = append(errs, cog.MakeBuildErrors("to", err)...)
+			}
+
+		}
+		delete(fields, "to")
+
+	}
+
+	for field := range fields {
+		errs = append(errs, cog.MakeBuildErrors("TimeRange", fmt.Errorf("unexpected field '%s'", field))...)
+	}
+
+	if len(errs) == 0 {
+		return nil
+	}
+
+	return errs
+}
+
+// Equals tests the equality of two `TimeRange` objects.
 func (resource TimeRange) Equals(other TimeRange) bool {
 	if resource.From == nil && other.From != nil || resource.From != nil && other.From == nil {
 		return false
@@ -942,6 +2384,11 @@ func (resource TimeRange) Equals(other TimeRange) bool {
 	}
 
 	return true
+}
+
+// Validate checks all the validation constraints that may be defined on `TimeRange` fields for violations and returns them.
+func (resource TimeRange) Validate() error {
+	return nil
 }
 
 type ContactPointType string

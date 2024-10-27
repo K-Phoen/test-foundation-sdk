@@ -17,15 +17,48 @@ import (
 
 type CustomQuery struct {
     // RefId and Hide are expected on all queries
-    RefId        *string `json:"refId,omitempty"`
+    RefId        string `json:"refId"`
     Hide         *bool   `json:"hide,omitempty"`
 
     // Query is specific to the CustomQuery type
     Query        string  `json:"query,omitempty"`
 }
 
+
+func (resource CustomQuery) Equals(otherCandidate variants.Dataquery) bool {
+    if otherCandidate == nil {
+        return false
+    }
+
+    other, ok := otherCandidate.(CustomQuery)
+    if !ok {
+        return false
+    }
+
+    if resource.RefId != other.RefId {
+        return false
+    }
+	
+    if resource.Hide == nil && other.Hide != nil || resource.Hide != nil && other.Hide == nil {
+        return false
+    }
+	if resource.Hide != nil && *resource.Hide != *other.Hide {
+        return false
+    }
+	
+	return resource.Query == other.Query
+}
+
+func (resource CustomQuery) Validate() error {
+	return nil
+}
+
 // Let cog know that CustomQuery is a Dataquery variant
 func (resource CustomQuery) ImplementsDataqueryVariant() {}
+
+func (resource CustomQuery) DataqueryType() string {
+	return "custom"
+}
 
 func CustomQueryVariantConfig() variants.DataqueryConfig {
     return variants.DataqueryConfig{
@@ -57,11 +90,15 @@ func NewCustomQueryBuilder(query string) *CustomQueryBuilder {
 }
 
 func (builder *CustomQueryBuilder) Build() (variants.Dataquery, error) {
+    if err := builder.internal.Validate(); err != nil {
+        return CustomQueryBuilder{}, err
+    }
+
     return *builder.internal, nil
 }
 
 func (builder *CustomQueryBuilder) RefId(refId string) *CustomQueryBuilder {
-    builder.internal.RefId = &refId
+    builder.internal.RefId = refId
     return builder
 }
 

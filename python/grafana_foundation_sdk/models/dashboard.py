@@ -1533,15 +1533,15 @@ class Panel:
     @classmethod
     def from_json(cls, data: dict[str, typing.Any]) -> typing.Self:
         args: dict[str, typing.Any] = {}
-        
         if "type" in data:
-            args["type_val"] = data["type"]
+            args["type"] = data["type"]
         if "id" in data:
-            args["id_val"] = data["id"]
+            args["id"] = data["id"]
         if "pluginVersion" in data:
-            args["plugin_version"] = data["pluginVersion"]
+            args["pluginVersion"] = data["pluginVersion"]
         if "tags" in data:
             args["tags"] = data["tags"]
+        
         if "targets" in data:
             args["targets"] = [cogruntime.dataquery_from_json(dataquery_json, data["datasource"]["type"] if data.get("datasource") is not None and data["datasource"].get("type", "") != "" else "") for dataquery_json in data["targets"]]
         if "title" in data:
@@ -1553,35 +1553,37 @@ class Panel:
         if "datasource" in data:
             args["datasource"] = DataSourceRef.from_json(data["datasource"])
         if "gridPos" in data:
-            args["grid_pos"] = GridPos.from_json(data["gridPos"])
+            args["gridPos"] = GridPos.from_json(data["gridPos"])
         if "links" in data:
             args["links"] = data["links"]
         if "repeat" in data:
             args["repeat"] = data["repeat"]
         if "repeatDirection" in data:
-            args["repeat_direction"] = data["repeatDirection"]
+            args["repeatDirection"] = data["repeatDirection"]
         if "maxPerRow" in data:
-            args["max_per_row"] = data["maxPerRow"]
+            args["maxPerRow"] = data["maxPerRow"]
         if "maxDataPoints" in data:
-            args["max_data_points"] = data["maxDataPoints"]
+            args["maxDataPoints"] = data["maxDataPoints"]
         if "transformations" in data:
             args["transformations"] = data["transformations"]
         if "interval" in data:
             args["interval"] = data["interval"]
         if "timeFrom" in data:
-            args["time_from"] = data["timeFrom"]
+            args["timeFrom"] = data["timeFrom"]
         if "timeShift" in data:
-            args["time_shift"] = data["timeShift"]
+            args["timeShift"] = data["timeShift"]
         if "hideTimeOverride" in data:
-            args["hide_time_override"] = data["hideTimeOverride"]
+            args["hideTimeOverride"] = data["hideTimeOverride"]
         if "libraryPanel" in data:
-            args["library_panel"] = LibraryPanelRef.from_json(data["libraryPanel"])
+            args["libraryPanel"] = LibraryPanelRef.from_json(data["libraryPanel"])
+        
         if "options" in data:
             config = cogruntime.panelcfg_config(data.get("type", ""))
             if config is not None and config.options_from_json_hook is not None:
                 args["options"] = config.options_from_json_hook(data["options"])
             else:
                 args["options"] = data["options"]
+        
         if "fieldConfig" in data:
             config = cogruntime.panelcfg_config(data.get("type", ""))
             field_config = FieldConfigSource.from_json(data["fieldConfig"])
@@ -1590,7 +1592,7 @@ class Panel:
                 custom_field_config = data["fieldConfig"].get("defaults", {}).get("custom", {})
                 field_config.defaults.custom = config.field_config_from_json_hook(custom_field_config)
 
-            args["field_config"] = field_config        
+            args["field_config"] = field_config
 
         return cls(**args)
 

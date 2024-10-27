@@ -28,14 +28,8 @@ func NewQueryBuilder(refId string) *QueryBuilder {
 }
 
 func (builder *QueryBuilder) Build() (Query, error) {
-	var errs cog.BuildErrors
-
-	for _, err := range builder.errors {
-		errs = append(errs, cog.MakeBuildErrors("Query", err)...)
-	}
-
-	if len(errs) != 0 {
-		return Query{}, errs
+	if err := builder.internal.Validate(); err != nil {
+		return Query{}, err
 	}
 
 	return *builder.internal, nil

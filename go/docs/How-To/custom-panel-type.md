@@ -12,12 +12,18 @@ import (
     "encoding/json"
 
     "github.com/grafana/grafana-foundation-sdk/go/cog"
-	"github.com/grafana/grafana-foundation-sdk/go/cog/variants"
+    "github.com/grafana/grafana-foundation-sdk/go/cog/variants"
     "github.com/grafana/grafana-foundation-sdk/go/dashboard"
 )
 
 type CustomPanelOptions struct {
     MakeBeautiful bool `json:"makeBeautiful"`
+}
+
+
+// Validate checks all the validation constraints that may be defined on `CustomPanelOptions` fields for violations and returns them.
+func (resource CustomPanelOptions) Validate() error {
+	return nil
 }
 
 func CustomPanelVariantConfig() variants.PanelcfgConfig {
@@ -54,14 +60,8 @@ func NewCustomPanelBuilder() *CustomPanelBuilder {
 }
 
 func (builder *CustomPanelBuilder) Build() (dashboard.Panel, error) {
-    var errs cog.BuildErrors
-
-    for _, err := range builder.errors {
-        errs = append(errs, cog.MakeBuildErrors("CustomPanel", err)...)
-    }
-
-    if len(errs) != 0 {
-        return dashboard.Panel{}, errs
+    if err := builder.internal.Validate(); err != nil {
+        return dashboard.Panel{}, err
     }
 
     return *builder.internal, nil

@@ -3,8 +3,6 @@
 package datagrid
 
 import (
-	"errors"
-
 	cog "github.com/grafana/grafana-foundation-sdk/go/cog"
 	variants "github.com/grafana/grafana-foundation-sdk/go/cog/variants"
 	dashboard "github.com/grafana/grafana-foundation-sdk/go/dashboard"
@@ -32,14 +30,8 @@ func NewPanelBuilder() *PanelBuilder {
 }
 
 func (builder *PanelBuilder) Build() (dashboard.Panel, error) {
-	var errs cog.BuildErrors
-
-	for _, err := range builder.errors {
-		errs = append(errs, cog.MakeBuildErrors("Panel", err)...)
-	}
-
-	if len(errs) != 0 {
-		return dashboard.Panel{}, errs
+	if err := builder.internal.Validate(); err != nil {
+		return dashboard.Panel{}, err
 	}
 
 	return *builder.internal, nil
@@ -117,10 +109,6 @@ func (builder *PanelBuilder) GridPos(gridPos dashboard.GridPos) *PanelBuilder {
 
 // Panel height. The height is the number of rows from the top edge of the panel.
 func (builder *PanelBuilder) Height(h uint32) *PanelBuilder {
-	if !(h > 0) {
-		builder.errors["h"] = cog.MakeBuildErrors("h", errors.New("h must be > 0"))
-		return builder
-	}
 	if builder.internal.GridPos == nil {
 		builder.internal.GridPos = &dashboard.GridPos{}
 	}
@@ -131,14 +119,6 @@ func (builder *PanelBuilder) Height(h uint32) *PanelBuilder {
 
 // Panel width. The width is the number of columns from the left edge of the panel.
 func (builder *PanelBuilder) Span(w uint32) *PanelBuilder {
-	if !(w > 0) {
-		builder.errors["w"] = cog.MakeBuildErrors("w", errors.New("w must be > 0"))
-		return builder
-	}
-	if !(w <= 24) {
-		builder.errors["w"] = cog.MakeBuildErrors("w", errors.New("w must be <= 24"))
-		return builder
-	}
 	if builder.internal.GridPos == nil {
 		builder.internal.GridPos = &dashboard.GridPos{}
 	}
@@ -404,10 +384,6 @@ func (builder *PanelBuilder) WithOverride(matcher dashboard.MatcherConfig, prope
 }
 
 func (builder *PanelBuilder) SelectedSeries(selectedSeries int32) *PanelBuilder {
-	if !(selectedSeries >= 0) {
-		builder.errors["selectedSeries"] = cog.MakeBuildErrors("selectedSeries", errors.New("selectedSeries must be >= 0"))
-		return builder
-	}
 	if builder.internal.Options == nil {
 		builder.internal.Options = &Options{}
 	}

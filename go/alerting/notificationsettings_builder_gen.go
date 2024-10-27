@@ -26,14 +26,8 @@ func NewNotificationSettingsBuilder() *NotificationSettingsBuilder {
 }
 
 func (builder *NotificationSettingsBuilder) Build() (NotificationSettings, error) {
-	var errs cog.BuildErrors
-
-	for _, err := range builder.errors {
-		errs = append(errs, cog.MakeBuildErrors("NotificationSettings", err)...)
-	}
-
-	if len(errs) != 0 {
-		return NotificationSettings{}, errs
+	if err := builder.internal.Validate(); err != nil {
+		return NotificationSettings{}, err
 	}
 
 	return *builder.internal, nil

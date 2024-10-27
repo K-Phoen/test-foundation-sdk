@@ -2,25 +2,31 @@
 
 package variants
 
-import "reflect"
+import (
+	"reflect"
+)
 
 type PanelcfgConfig struct {
-	Identifier             string
-	OptionsUnmarshaler     func(raw []byte) (any, error)
-	FieldConfigUnmarshaler func(raw []byte) (any, error)
-	GoConverter            func(inputPanel any) string
+	Identifier                   string
+	OptionsUnmarshaler           func(raw []byte) (any, error)
+	FieldConfigUnmarshaler       func(raw []byte) (any, error)
+	StrictOptionsUnmarshaler     func(raw []byte) (any, error)
+	StrictFieldConfigUnmarshaler func(raw []byte) (any, error)
+	GoConverter                  func(inputPanel any) string
 }
 
 type DataqueryConfig struct {
-	Identifier           string
-	DataqueryUnmarshaler func(raw []byte) (Dataquery, error)
-	GoConverter          func(inputPanel any) string
+	Identifier                 string
+	DataqueryUnmarshaler       func(raw []byte) (Dataquery, error)
+	StrictDataqueryUnmarshaler func(raw []byte) (Dataquery, error)
+	GoConverter                func(inputPanel any) string
 }
 
 type Dataquery interface {
 	ImplementsDataqueryVariant()
 	Equals(other Dataquery) bool
 	DataqueryType() string
+	Validate() error
 }
 
 type Panelcfg interface {
@@ -34,6 +40,10 @@ func (unknown UnknownDataquery) DataqueryType() string {
 }
 
 func (unknown UnknownDataquery) ImplementsDataqueryVariant() {}
+
+func (unknown UnknownDataquery) Validate() error {
+	return nil
+}
 
 func (unknown UnknownDataquery) Equals(otherCandidate Dataquery) bool {
 	if otherCandidate == nil {
@@ -57,4 +67,18 @@ func (unknown UnknownDataquery) Equals(otherCandidate Dataquery) bool {
 	}
 
 	return true
+}
+
+type UnknownDataqueryBuilder struct {
+	internal *UnknownDataquery
+}
+
+func NewUnknownDataqueryBuilderFromObject(dataquery UnknownDataquery) *UnknownDataqueryBuilder {
+	return &UnknownDataqueryBuilder{
+		internal: &dataquery,
+	}
+}
+
+func (builder *UnknownDataqueryBuilder) Build() (Dataquery, error) {
+	return *builder.internal, nil
 }

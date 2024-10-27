@@ -28,8 +28,7 @@ find "${__dir}/versions" -maxdepth 1 -mindepth 1 -type d -print | while read -r 
 
     SOURCE_VERSION_FOLDER="./versions/${full_version}" mkdocs build -f ${__dir}/mkdocs-version.yml -d ${__dir}/site/${full_version}
 
+    echo "🪧 Minifying HTML"
     minhtml --do-not-minify-doctype --ensure-spec-compliant-unquoted-attribute-values --keep-closing-tags --keep-input-type-text-attr --keep-html-and-head-opening-tags --preserve-brace-template-syntax --keep-spaces-between-attributes ${__dir}/site/${full_version}/*/*/*/*.html
     minhtml --do-not-minify-doctype --ensure-spec-compliant-unquoted-attribute-values --keep-closing-tags --keep-input-type-text-attr --keep-html-and-head-opening-tags --preserve-brace-template-syntax --keep-spaces-between-attributes ${__dir}/site/${full_version}/*/Reference/*/*/*.html
 done
-
-echo "🪧 Minifying HTML"
